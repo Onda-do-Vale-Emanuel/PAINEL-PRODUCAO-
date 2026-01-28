@@ -7,6 +7,7 @@ const META_MES = 1325000;
 // FUNÇÕES AUXILIARES
 // ======================================================
 function formatarMoeda(valor) {
+  if (valor === null || valor === undefined) return "--";
   return valor.toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL"
@@ -14,6 +15,7 @@ function formatarMoeda(valor) {
 }
 
 function formatarPercentual(valor) {
+  if (valor === null || valor === undefined) return "--";
   return `${valor.toFixed(1).replace(".", ",")}%`;
 }
 
@@ -24,7 +26,7 @@ function aplicarCor(elemento, valor) {
 }
 
 // ======================================================
-// KPI FATURAMENTO
+// KPI FATURAMENTO (TOTAL DE PEDIDOS)
 // ======================================================
 fetch("site/dados/kpi_faturamento.json")
   .then(r => r.json())
@@ -34,29 +36,34 @@ fetch("site/dados/kpi_faturamento.json")
     const anterior = fat.ano_anterior;
     const variacao = fat.variacao;
 
-    const dataAtual = `até ${fat.data}`;
-    const dataAnterior = `até ${fat.data.replace(fat.data.slice(-4), fat.data.slice(-4) - 1)}`;
+    // Datas vindas do Python
+    const dataAtual = fat.data_atual;
+    const dataAnterior = fat.data_ano_anterior;
 
     document.getElementById("fatAtual").innerText =
       formatarMoeda(atual);
     document.getElementById("fatDataAtual").innerText =
-      `(${dataAtual})`;
+      `(até ${dataAtual})`;
 
     document.getElementById("fatAnoAnterior").innerText =
       formatarMoeda(anterior);
     document.getElementById("fatDataAnoAnterior").innerText =
-      `(${dataAnterior})`;
+      `(até ${dataAnterior})`;
 
     const elVar = document.getElementById("fatVariacao");
     elVar.innerText =
       `▲ ${formatarPercentual(variacao)} vs ano anterior`;
     aplicarCor(elVar, variacao);
 
+    // Meta
     const percMeta = (atual / META_MES) * 100;
     document.getElementById("fatMeta").innerText =
       `Meta mês: ${formatarMoeda(META_MES)}`;
     document.getElementById("fatMetaPerc").innerText =
       `🎯 ${formatarPercentual(percMeta)} da meta`;
+  })
+  .catch(() => {
+    console.error("Erro ao carregar KPI faturamento");
   });
 
 // ======================================================
@@ -67,12 +74,16 @@ fetch("site/dados/kpi_quantidade_pedidos.json")
   .then(qtd => {
 
     document.getElementById("qtdAtual").innerText =
-      qtd.atual;
+      qtd.atual ?? "--";
     document.getElementById("qtdAnoAnterior").innerText =
-      qtd.ano_anterior;
+      qtd.ano_anterior ?? "--";
 
+    // Slide 2
     document.getElementById("qtdAtualSlide").innerText =
-      qtd.atual;
+      qtd.atual ?? "--";
+  })
+  .catch(() => {
+    console.error("Erro ao carregar KPI quantidade de pedidos");
   });
 
 // ======================================================
@@ -82,5 +93,8 @@ fetch("site/dados/kpi_ticket_medio.json")
   .then(r => r.json())
   .then(ticket => {
     document.getElementById("ticketAtual").innerText =
-      formatarMoeda(ticket.valor);
+      formatarMoeda(ticket.atual);
+  })
+  .catch(() => {
+    console.error("Erro ao carregar KPI ticket médio");
   });
