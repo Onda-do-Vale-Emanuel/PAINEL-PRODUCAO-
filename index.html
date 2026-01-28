@@ -2,36 +2,45 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard TV</title>
-  <link rel="stylesheet" href="./style.css">
+  <title>Painel Comercial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="slide ativo" id="slide1">
+<div class="slide ativo">
   <h1>Total de Pedidos</h1>
 
-  <div class="box grande">
-    <div class="valor" id="fatAtual">--</div>
-    <div class="qtd" id="qtdAtual">--</div>
-    <div class="periodo" id="periodoAtual">--</div>
-  </div>
+  <div class="cards">
 
-  <div class="box medio">
-    <div class="valor" id="fatAnoAnterior">--</div>
-    <div class="qtd" id="qtdAnoAnterior">--</div>
-    <div class="periodo" id="periodoAnterior">--</div>
-  </div>
+    <div class="card grande">
+      <span class="titulo">Faturamento Atual</span>
+      <span class="valor" id="fatAtual">--</span>
+      <span class="qtd" id="qtdAtual">--</span>
+      <span class="periodo" id="periodoAtual">--</span>
+    </div>
 
-  <div class="box variacao" id="fatVariacao">--</div>
+    <div class="card medio">
+      <span class="titulo">Ano Anterior</span>
+      <span class="valor" id="fatAnoAnterior">--</span>
+      <span class="qtd" id="qtdAnoAnterior">--</span>
+      <span class="periodo" id="periodoAnterior">--</span>
+    </div>
 
-  <div class="box meta">
-    <div id="fatMeta">Meta mês: --</div>
-    <div id="fatMetaPerc">--</div>
+    <div class="card variacao">
+      <span class="titulo">Variação</span>
+      <span class="valor destaque" id="fatVariacao">--</span>
+    </div>
+
+    <div class="card meta">
+      <span class="titulo">Meta Mensal</span>
+      <span class="valor" id="fatMeta">--</span>
+      <span class="percentual" id="fatMetaPerc">--</span>
+    </div>
+
   </div>
 </div>
 
-<script src="./kpis.js"></script>
-<script src="./slider.js"></script>
-
+<script src="kpis.js"></script>
 </body>
 </html>
