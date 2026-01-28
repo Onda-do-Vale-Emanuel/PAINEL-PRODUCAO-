@@ -3,69 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <title>Painel Comercial</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- SLIDE 1 -->
-<div class="slide ativo">
+<!-- ================= SLIDE 1 ================= -->
+<div class="slide ativo" id="slide1">
   <h1>Total de Pedidos</h1>
 
-  <div class="cards">
-    <div class="card grande">
-      <span class="titulo">Faturamento Atual</span>
-      <span class="valor" id="fatAtual">--</span>
-      <span class="qtd" id="qtdAtual">--</span>
-      <span class="periodo" id="periodoAtual">--</span>
-    </div>
+  <div class="box grande">
+    <div class="valor" id="fatAtual">--</div>
+    <div class="qtd" id="qtdAtual">-- pedidos</div>
+    <div class="periodo" id="periodoAtual">--</div>
+  </div>
 
-    <div class="card medio">
-      <span class="titulo">Ano Anterior</span>
-      <span class="valor" id="fatAnoAnterior">--</span>
-      <span class="qtd" id="qtdAnoAnterior">--</span>
-      <span class="periodo" id="periodoAnterior">--</span>
-    </div>
+  <div class="box medio">
+    <div class="valor" id="fatAnoAnterior">--</div>
+    <div class="qtd" id="qtdAnoAnterior">-- pedidos</div>
+    <div class="periodo" id="periodoAnterior">--</div>
+  </div>
 
-    <div class="card variacao">
-      <span class="titulo">Variação</span>
-      <span class="valor destaque" id="fatVariacao">--</span>
-    </div>
+  <div class="box variacao" id="fatVariacao">--</div>
+</div>
 
-    <div class="card meta">
-      <span class="titulo">Meta Mensal</span>
-      <span class="valor" id="fatMeta">R$ 1.325.000,00</span>
-      <span class="percentual" id="fatMetaPerc">--</span>
-    </div>
+<!-- ================= SLIDE 2 ================= -->
+<div class="slide" id="slide2">
+  <h1>Meta do Mês</h1>
+
+  <div class="box grande">
+    <div class="valor" id="fatMeta">--</div>
+    <div class="qtd" id="fatMetaPerc">--</div>
   </div>
 </div>
 
-<!-- SLIDE 2 -->
-<div class="slide">
-  <h1>Indicadores</h1>
+<!-- ================= SLIDE 3 ================= -->
+<div class="slide" id="slide3">
+  <h1>Resumo</h1>
 
-  <div class="cards">
-    <div class="card grande">
-      <span class="titulo">Pedidos no Mês</span>
-      <span class="valor" id="qtdAtual2">--</span>
-    </div>
-
-    <div class="card medio">
-      <span class="titulo">Pedidos Ano Anterior</span>
-      <span class="valor" id="qtdAnoAnterior2">--</span>
-    </div>
-  </div>
-</div>
-
-<!-- SLIDE 3 -->
-<div class="slide">
-  <h1>Status do Painel</h1>
-
-  <div class="cards">
-    <div class="card grande">
-      <span class="titulo">Última Atualização</span>
-      <span class="valor" id="dataAtualizacao">--</span>
-    </div>
+  <div class="box grande">
+    <div class="valor" id="resumoFat">--</div>
+    <div class="qtd" id="resumoQtd">--</div>
   </div>
 </div>
 

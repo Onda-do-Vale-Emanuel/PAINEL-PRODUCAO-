@@ -1,39 +1,52 @@
-async function carregarJSON(caminho) {
-  const resp = await fetch(caminho);
-  return await resp.json();
-}
-
-function setTexto(id, valor) {
-  const el = document.getElementById(id);
-  if (el) el.innerText = valor;
-}
-
 async function atualizarKPIs() {
   try {
-    const fat = await carregarJSON("site/dados/kpi_faturamento.json");
-    const qtd = await carregarJSON("site/dados/kpi_quantidade_pedidos.json");
+    const fat = await fetch("site/dados/kpi_faturamento.json").then(r => r.json());
+    const qtd = await fetch("site/dados/kpi_quantidade_pedidos.json").then(r => r.json());
 
-    setTexto("fatAtual", `R$ ${fat.atual.toLocaleString("pt-BR")}`);
-    setTexto("fatAnoAnterior", `R$ ${fat.ano_anterior.toLocaleString("pt-BR")}`);
-    setTexto("fatVariacao", `${fat.variacao}%`);
-    setTexto("periodoAtual", `até ${fat.data_fim}`);
-    setTexto("periodoAnterior", "até 28/01/2025");
+    // ===== SLIDE 1 =====
+    document.getElementById("fatAtual").innerText =
+      fat.atual.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-    setTexto("qtdAtual", `${qtd.atual} pedidos`);
-    setTexto("qtdAnoAnterior", `${qtd.ano_anterior} pedidos`);
+    document.getElementById("qtdAtual").innerText =
+      `${qtd.atual} pedidos`;
 
-    setTexto("qtdAtual2", qtd.atual);
-    setTexto("qtdAnoAnterior2", qtd.ano_anterior);
+    document.getElementById("periodoAtual").innerText =
+      `até ${fat.data_fim}`;
 
-    const meta = 1325000;
-    const perc = ((fat.atual / meta) * 100).toFixed(1);
-    setTexto("fatMetaPerc", `${perc}% da meta`);
+    document.getElementById("fatAnoAnterior").innerText =
+      fat.ano_anterior.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-    setTexto("dataAtualizacao", new Date().toLocaleString("pt-BR"));
+    document.getElementById("qtdAnoAnterior").innerText =
+      `${qtd.ano_anterior} pedidos`;
+
+    document.getElementById("periodoAnterior").innerText =
+      `até ${fat.data_ano_anterior || "mesmo período"}`;
+
+    const variacao = document.getElementById("fatVariacao");
+    variacao.innerText = `${fat.variacao}% vs ano anterior`;
+    variacao.className = "box variacao " + (fat.variacao >= 0 ? "positivo" : "negativo");
+
+    // ===== SLIDE 2 (META FIXA POR ENQUANTO) =====
+    const META = 1325000;
+    const perc = ((fat.atual / META) * 100).toFixed(1);
+
+    document.getElementById("fatMeta").innerText =
+      META.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+    document.getElementById("fatMetaPerc").innerText =
+      `${perc}% da meta`;
+
+    // ===== SLIDE 3 =====
+    document.getElementById("resumoFat").innerText =
+      fat.atual.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+    document.getElementById("resumoQtd").innerText =
+      `${qtd.atual} pedidos`;
 
   } catch (e) {
-    console.error("Erro ao atualizar KPIs", e);
+    console.error("Erro ao atualizar KPIs:", e);
   }
 }
 
 atualizarKPIs();
+setInterval(atualizarKPIs, 60000);
