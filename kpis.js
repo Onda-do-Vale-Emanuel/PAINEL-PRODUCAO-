@@ -36,10 +36,11 @@ fetch("site/dados/kpi_faturamento.json")
     const anterior = fat.ano_anterior;
     const variacao = fat.variacao;
 
-    // Datas vindas do Python
+    // Datas vindas do JSON (fonte única da verdade)
     const dataAtual = fat.data_atual;
     const dataAnterior = fat.data_ano_anterior;
 
+    // Valores principais
     document.getElementById("fatAtual").innerText =
       formatarMoeda(atual);
     document.getElementById("fatDataAtual").innerText =
@@ -50,20 +51,30 @@ fetch("site/dados/kpi_faturamento.json")
     document.getElementById("fatDataAnoAnterior").innerText =
       `(até ${dataAnterior})`;
 
+    // Variação
     const elVar = document.getElementById("fatVariacao");
-    elVar.innerText =
-      `▲ ${formatarPercentual(variacao)} vs ano anterior`;
-    aplicarCor(elVar, variacao);
+    if (variacao !== null) {
+      elVar.innerText =
+        `▲ ${formatarPercentual(variacao)} vs ano anterior`;
+      aplicarCor(elVar, variacao);
+    } else {
+      elVar.innerText = "--";
+    }
 
     // Meta
-    const percMeta = (atual / META_MES) * 100;
-    document.getElementById("fatMeta").innerText =
-      `Meta mês: ${formatarMoeda(META_MES)}`;
-    document.getElementById("fatMetaPerc").innerText =
-      `🎯 ${formatarPercentual(percMeta)} da meta`;
+    if (atual !== null) {
+      const percMeta = (atual / META_MES) * 100;
+      document.getElementById("fatMeta").innerText =
+        `Meta mês: ${formatarMoeda(META_MES)}`;
+      document.getElementById("fatMetaPerc").innerText =
+        `🎯 ${formatarPercentual(percMeta)} da meta`;
+    } else {
+      document.getElementById("fatMeta").innerText = "Meta mês: --";
+      document.getElementById("fatMetaPerc").innerText = "--";
+    }
   })
-  .catch(() => {
-    console.error("Erro ao carregar KPI faturamento");
+  .catch(err => {
+    console.error("Erro KPI faturamento:", err);
   });
 
 // ======================================================
@@ -82,8 +93,8 @@ fetch("site/dados/kpi_quantidade_pedidos.json")
     document.getElementById("qtdAtualSlide").innerText =
       qtd.atual ?? "--";
   })
-  .catch(() => {
-    console.error("Erro ao carregar KPI quantidade de pedidos");
+  .catch(err => {
+    console.error("Erro KPI quantidade:", err);
   });
 
 // ======================================================
@@ -92,9 +103,10 @@ fetch("site/dados/kpi_quantidade_pedidos.json")
 fetch("site/dados/kpi_ticket_medio.json")
   .then(r => r.json())
   .then(ticket => {
+
     document.getElementById("ticketAtual").innerText =
       formatarMoeda(ticket.atual);
   })
-  .catch(() => {
-    console.error("Erro ao carregar KPI ticket médio");
+  .catch(err => {
+    console.error("Erro KPI ticket médio:", err);
   });
