@@ -1,41 +1,111 @@
-fetch('dados/kpi_faturamento.json')
-  .then(response => response.json())
-  .then(data => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    document.getElementById('fatAtual').innerText =
-      `R$ ${data.atual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de 01/01/2026 até ${data.data_atual}`;
+  /* =====================
+     FUNÇÕES
+  ====================== */
 
-    document.getElementById('qtdAtual').innerText =
-      `${data.qtd_atual} pedidos`;
+  function moeda(v) {
+    if (v === undefined || v === null) return "--";
+    return Number(v).toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+  }
 
-    document.getElementById('fatAnoAnterior').innerText =
-      `R$ ${data.ano_anterior.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de 01/01/2025 até ${data.data_ano_anterior}`;
+  function numero(v) {
+    if (v === undefined || v === null) return "--";
+    return Number(v).toLocaleString("pt-BR");
+  }
 
-    document.getElementById('qtdAnoAnterior').innerText =
-      `${data.qtd_ano_anterior} pedidos`;
+  function percentual(atual, meta) {
+    if (!meta || meta === 0) return "";
+    const p = (atual / meta) * 100;
+    const cls = p >= 100 ? "positivo" : "negativo";
+    return `<span class="${cls}">${p.toFixed(1)}%</span>`;
+  }
 
-    const variacaoEl = document.getElementById('fatVariacao');
-    const perc = Number(data.variacao);
+  function nomeMesAtual() {
+    const meses = [
+      "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+      "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+    ];
+    return meses[new Date().getMonth()];
+  }
 
-    if (perc >= 0) {
-      variacaoEl.className = 'variacao positivo';
-      variacaoEl.innerText = `▲ ${perc}% vs ano anterior`;
-    } else {
-      variacaoEl.className = 'variacao negativo';
-      variacaoEl.innerText = `▼ ${Math.abs(perc)}% vs ano anterior`;
-    }
+  /* =====================
+     ELEMENTOS
+  ====================== */
 
-    document.getElementById('fatMeta').innerText =
-      `Meta mês: R$ ${data.meta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  const fatAtual  = document.getElementById("fatAtual");
+  const fatAnterior = document.getElementById("fatAnterior");
+  const fatMetaEl = document.getElementById("fatMeta");
+  const fatPercEl = document.getElementById("fatPerc");
+  const fatVariacao = document.getElementById("fatVariacao");
 
-    const metaPercEl = document.getElementById('fatMetaPerc');
-    metaPercEl.innerText = `🎯 ${data.meta_perc}% da meta`;
+  const qtdAtual = document.getElementById("qtdAtual");
+  const qtdAnterior = document.getElementById("qtdAnterior");
 
-    if (data.meta_perc >= 100) {
-      metaPercEl.className = 'meta-perc ok';
-    } else if (data.meta_perc >= 80) {
-      metaPercEl.className = 'meta-perc atencao';
-    } else {
-      metaPercEl.className = 'meta-perc ruim';
+  const ticketAtual = document.getElementById("ticketAtual");
+  const ticketAnterior = document.getElementById("ticketAnterior");
+
+  const m2Atual = document.getElementById("m2Atual");
+  const kgAtual = document.getElementById("kgAtual");
+
+  /* =====================
+     META (FIXA POR ENQUANTO)
+  ====================== */
+
+  const metaFaturamento = 1325000;
+  const mesAtual = nomeMesAtual();
+  fatMetaEl.innerText = `Meta ${mesAtual}: ${moeda(metaFaturamento)}`;
+
+  /* =====================
+     FATURAMENTO (COM IPI)
+  ====================== */
+
+  fetch("site/dados/kpi_faturamento.json")
+    .then(r => r.json())
+    .then(d => {
+      fatAtual.innerText = moeda(d.atual);
+      fatAnterior.innerText = `Anterior: ${moeda(d.ano_anterior)}`;
+      fatPercEl.innerHTML = percentual(d.atual, metaFaturamento);
+
+      if (d.variacao !== null) {
+        const cls = d.variacao >= 0 ? "positivo" : "negativo";
+        fatVariacao.innerHTML = `<span class="${cls}">${d.variacao}%</span>`;
+      }
+    });
+
+  /* =====================
+     QTD PEDIDOS
+  ====================== */
+
+  fetch("site/dados/kpi_quantidade_pedidos.json")
+    .then(r => r.json())
+    .then(d => {
+      qtdAtual.innerText = numero(d.atual);
+      qtdAnterior.innerText = `Anterior: ${numero(d.ano_anterior)}`;
+    });
+
+  /* =====================
+     TICKET MÉDIO (DERIVADO)
+  ====================== */
+
+  Promise.all([
+    fetch("site/dados/kpi_faturamento.json").then(r => r.json()),
+    fetch("site/dados/kpi_quantidade_pedidos.json").then(r => r.json())
+  ]).then(([fat, qtd]) => {
+    if (qtd.atual > 0) {
+      const ticket = fat.atual / qtd.atual;
+      ticketAtual.innerText = moeda(ticket);
     }
   });
+
+  /* =====================
+     SLIDE 2 (PLACEHOLDER)
+  ====================== */
+
+  if (m2Atual) m2Atual.innerText = "--";
+  if (kgAtual) kgAtual.innerText = "--";
+
+});
