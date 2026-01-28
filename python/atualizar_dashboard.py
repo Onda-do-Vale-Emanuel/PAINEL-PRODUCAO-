@@ -4,28 +4,28 @@ from datetime import datetime
 from pathlib import Path
 import numpy as np
 
-print("🔄 Iniciando atualização dos KPIs...")
+print("🔄 Atualizando KPI de faturamento (PEDIDOS ÚNICOS)...")
 
 # ======================================================
-# CAMINHOS DO PROJETO
+# CAMINHOS
 # ======================================================
 BASE_DIR = Path(__file__).resolve().parents[1]
 ARQ_EXCEL = BASE_DIR / "excel" / "PEDIDOS ONDA.xlsx"
 PASTA_DADOS = BASE_DIR / "site" / "dados"
-PASTA_DADOS.mkdir(exist_ok=True)
+PASTA_DADOS.mkdir(parents=True, exist_ok=True)
 
 # ======================================================
-# ÍNDICES DAS COLUNAS (base 0)
+# COLUNAS (BASE 0)
 # ======================================================
-COL_TIPO = 3          # Tipo de pedido
-COL_DATA = 4          # Data
-COL_VALOR = 7         # Valor Total
-COL_PEDIDO = 1        # Número do pedido
+COL_PEDIDO = 1   # Coluna B → Pedido
+COL_TIPO   = 3   # Tipo (NORMAL)
+COL_DATA   = 4   # Data
+COL_VALOR  = 7   # Valor total do pedido
 
 # ======================================================
 # DATA DE REFERÊNCIA
 # ======================================================
-HOJE = datetime(2026, 1, 26)
+HOJE = datetime.today()
 ANO_ATUAL = HOJE.year
 ANO_ANTERIOR = HOJE.year - 1
 
@@ -52,100 +52,84 @@ df["DATA_OK"] = pd.to_datetime(
 df = df.dropna(subset=["DATA_OK"])
 
 # ======================================================
+# CRIAR COLUNA ANO (EVITA FutureWarning)
+# ======================================================
+df["ANO"] = df["DATA_OK"].dt.year
+
+# ======================================================
 # TRATAR VALOR
 # ======================================================
-df["VALOR_OK"] = (
-    df.iloc[:, COL_VALOR]
-    .astype(str)
-    .str.replace(".", "", regex=False)
-    .str.replace(",", ".", regex=False)
+def converter_valor(v):
+    if pd.isna(v):
+        return 0.0
+    if isinstance(v, (int, float, np.integer, np.floating)):
+        return float(v)
+    v = str(v).replace(".", "").replace(",", ".")
+    try:
+        return float(v)
+    except:
+        return 0.0
+
+df["VALOR_OK"] = df.iloc[:, COL_VALOR].apply(converter_valor)
+
+# ======================================================
+# AGRUPAR POR PEDIDO + ANO (VALOR ÚNICO POR PEDIDO)
+# ======================================================
+df_pedidos = (
+    df.groupby(
+        [df.iloc[:, COL_PEDIDO], "ANO"],
+        as_index=False
+    )
+    .agg({
+        "VALOR_OK": "max",
+        "DATA_OK": "min"
+    })
 )
-df["VALOR_OK"] = pd.to_numeric(df["VALOR_OK"], errors="coerce").fillna(0)
 
 # ======================================================
 # FILTRAR PERÍODOS
 # ======================================================
-df_atual = df[
-    (df["DATA_OK"].dt.year == ANO_ATUAL) &
-    (df["DATA_OK"] <= HOJE)
+df_atual = df_pedidos[
+    (df_pedidos["ANO"] == ANO_ATUAL) &
+    (df_pedidos["DATA_OK"] <= HOJE)
 ]
 
-df_ano_anterior = df[
-    (df["DATA_OK"].dt.year == ANO_ANTERIOR) &
-    (df["DATA_OK"] <= HOJE.replace(year=ANO_ANTERIOR))
+df_ano_anterior = df_pedidos[
+    (df_pedidos["ANO"] == ANO_ANTERIOR) &
+    (df_pedidos["DATA_OK"] <= HOJE.replace(year=ANO_ANTERIOR))
 ]
 
-print(f"📆 Linhas ano atual: {len(df_atual)}")
-print(f"📆 Linhas ano anterior: {len(df_ano_anterior)}")
-
 # ======================================================
-# KPI 1 — FATURAMENTO
+# CÁLCULOS
 # ======================================================
-fat_atual = float(df_atual["VALOR_OK"].sum())
-fat_ano_anterior = float(df_ano_anterior["VALOR_OK"].sum())
+valor_atual = round(df_atual["VALOR_OK"].sum(), 2)
+valor_ano_anterior = round(df_ano_anterior["VALOR_OK"].sum(), 2)
 
-if fat_ano_anterior > 0:
-    var_faturamento = ((fat_atual - fat_ano_anterior) / fat_ano_anterior) * 100
+if valor_ano_anterior > 0:
+    variacao = round(
+        ((valor_atual - valor_ano_anterior) / valor_ano_anterior) * 100, 1
+    )
 else:
-    var_faturamento = None
+    variacao = None
 
 # ======================================================
-# KPI 2 — QUANTIDADE DE PEDIDOS
-# (1 linha = 1 pedido, igual Excel)
+# GERAR JSON
 # ======================================================
-qtd_atual = int(len(df_atual))
-qtd_ano_anterior = int(len(df_ano_anterior))
+dados = {
+    "atual": valor_atual,
+    "ano_anterior": valor_ano_anterior,
+    "data_atual": HOJE.strftime("%d/%m/%Y"),
+    "data_ano_anterior": HOJE.replace(year=ANO_ANTERIOR).strftime("%d/%m/%Y"),
+    "variacao": variacao
+}
 
-if qtd_ano_anterior > 0:
-    var_qtd = ((qtd_atual - qtd_ano_anterior) / qtd_ano_anterior) * 100
-else:
-    var_qtd = None
-
-# ======================================================
-# KPI 3 — TICKET MÉDIO
-# ======================================================
-ticket_atual = fat_atual / qtd_atual if qtd_atual > 0 else 0
-ticket_ano_anterior = (
-    fat_ano_anterior / qtd_ano_anterior if qtd_ano_anterior > 0 else 0
-)
-
-if ticket_ano_anterior > 0:
-    var_ticket = ((ticket_atual - ticket_ano_anterior) / ticket_ano_anterior) * 100
-else:
-    var_ticket = None
-
-# ======================================================
-# GERAR JSONs
-# ======================================================
-
-# FATURAMENTO
 with open(PASTA_DADOS / "kpi_faturamento.json", "w", encoding="utf-8") as f:
-    json.dump({
-        "atual": round(fat_atual, 2),
-        "ano_anterior": round(fat_ano_anterior, 2),
-        "variacao": round(var_faturamento, 1) if var_faturamento is not None else None
-    }, f, ensure_ascii=False, indent=2)
-
-# QUANTIDADE DE PEDIDOS
-with open(PASTA_DADOS / "kpi_quantidade_pedidos.json", "w", encoding="utf-8") as f:
-    json.dump({
-        "atual": qtd_atual,
-        "ano_anterior": qtd_ano_anterior,
-        "variacao": round(var_qtd, 1) if var_qtd is not None else None
-    }, f, ensure_ascii=False, indent=2)
-
-# TICKET MÉDIO
-with open(PASTA_DADOS / "kpi_ticket_medio.json", "w", encoding="utf-8") as f:
-    json.dump({
-        "atual": round(ticket_atual, 2),
-        "ano_anterior": round(ticket_ano_anterior, 2),
-        "variacao": round(var_ticket, 1) if var_ticket is not None else None
-    }, f, ensure_ascii=False, indent=2)
+    json.dump(dados, f, ensure_ascii=False, indent=2)
 
 # ======================================================
 # LOG FINAL
 # ======================================================
-print("✅ KPIs gerados com sucesso")
-print(f"💰 Faturamento atual: {fat_atual:,.2f}")
-print(f"📦 Quantidade pedidos: {qtd_atual}")
-print(f"🎯 Ticket médio: {ticket_atual:,.2f}")
+print("✅ KPI de faturamento gerado com sucesso")
+print(f"💰 Faturamento até {dados['data_atual']}: {valor_atual:,.2f}")
+print(f"💰 Faturamento até {dados['data_ano_anterior']}: {valor_ano_anterior:,.2f}")
+print(f"📈 Variação: {variacao if variacao is not None else '--'}%")
