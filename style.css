@@ -2,76 +2,219 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
 }
 
 body {
-  background: #f37021; /* LARANJA */
-  color: #fff;
-  width: 100vw;
-  height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f37021; /* laranja corporativo */
+  color: #111;
+  overflow: hidden;
 }
+
+/* SLIDES BÁSICO */
 
 .slide {
-  width: 100%;
-  height: 100%;
-  padding: 50px;
+  position: absolute;
+  inset: 0;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
 }
 
-h1 {
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* CABEÇALHO */
+
+.slide-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.slide-header h1 {
   font-size: 52px;
-  margin-bottom: 40px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #ffffff;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
 }
 
-.box {
-  background: rgba(0,0,0,0.85);
-  border-radius: 18px;
-  padding: 25px 35px;
-  margin-bottom: 25px;
-}
-
-.box.grande {
-  font-size: 46px;
-}
-
-.box.medio {
-  font-size: 36px;
-}
-
-.valor {
-  font-weight: bold;
-}
-
-.qtd {
-  font-size: 22px;
-  margin-top: 8px;
-}
-
-.box.variacao {
+.slide-header h2 {
   font-size: 32px;
-  font-weight: bold;
+  margin-top: 8px;
+  color: #ffe8d6;
 }
+
+/* CONTEÚDO CENTRAL */
+
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  justify-content: center;
+}
+
+/* GRID DE CARDS */
+
+.kpi-row {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.kpi-card {
+  background: rgba(245, 245, 245, 0.96);
+  border-radius: 20px;
+  padding: 20px 26px;
+  min-width: 420px;
+  max-width: 620px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Tamanhos específicos */
+
+.kpi-main {
+  flex: 1.2;
+}
+
+.kpi-secondary {
+  flex: 1;
+}
+
+.kpi-variacao {
+  min-width: 600px;
+  max-width: 900px;
+  align-items: center;
+}
+
+.kpi-meta {
+  min-width: 600px;
+  max-width: 900px;
+}
+
+/* TIPOGRAFIA DOS CARDS */
+
+.kpi-label {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.kpi-number {
+  font-size: 52px;
+  font-weight: 900;
+  color: #111;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 42px;
+  font-weight: 800;
+  color: #1b1b1b;
+}
+
+.kpi-sub {
+  margin-top: 6px;
+  font-size: 22px;
+  color: #555;
+}
+
+/* VARIAÇÃO / META */
+
+.kpi-var {
+  font-size: 40px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.kpi-meta div:first-child {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #222;
+}
+
+.kpi-meta div:last-child {
+  font-size: 30px;
+  font-weight: 900;
+}
+
+/* CORES POSITIVO / NEGATIVO */
 
 .positivo {
-  color: #00ff7f;
+  color: #00b35a; /* verde */
 }
 
 .negativo {
-  color: #ff4c4c;
+  color: #ff3b3b; /* vermelho */
 }
 
-.box.meta {
-  font-size: 26px;
-}
+/* META – ESTADOS ESPECIAIS (opcional) */
 
 .meta-ok {
-  color: #00ff7f;
+  color: #00b35a;
 }
 
-.meta-alerta {
-  color: #ffd700;
+.meta-atencao {
+  color: #ffb400;
 }
 
 .meta-ruim {
-  color: #ff4c4c;
+  color: #ff3b3b;
+}
+
+/* SLIDE 4 – IMAGEM */
+
+.slide-img-content {
+  align-items: center;
+}
+
+.img-institucional {
+  max-width: 90%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  background: #f5f5f5;
+}
+
+/* RESPONSIVO SIMPLES – TELAS MENORES */
+
+@media (max-width: 1200px) {
+  .kpi-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .kpi-card {
+    min-width: 80%;
+  }
+
+  .kpi-number {
+    font-size: 42px;
+  }
+
+  .kpi-value {
+    font-size: 34px;
+  }
+
+  .kpi-var {
+    font-size: 32px;
+  }
 }

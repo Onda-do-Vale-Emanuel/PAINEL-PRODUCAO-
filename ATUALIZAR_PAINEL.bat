@@ -1,16 +1,35 @@
 @echo off
 chcp 65001 >nul
+title Atualizar Painel Comercial
 
 cd /d D:\USUARIOS\ADM05\Documents\dashboard_tv
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; ^
-python python\atualizar_dashboard.py; ^
-python python\atualizar_kpi_quantidade_pedidos.py; ^
-git add site/dados/*.json; ^
-git commit -m 'Atualização automática KPIs' || exit 0; ^
-git push"
+echo =====================================
+echo Atualizando painel a partir do Excel
+echo =====================================
+echo.
+
+python python\atualizar_painel_completo.py
+
+if errorlevel 1 (
+    echo.
+    echo ❌ Erro na execução do Python
+    pause
+    exit /b
+)
 
 echo.
+echo Publicando no GitHub...
+echo.
+
+git add dados\*.json site\dados\*.json
+git commit -m "Atualização automática KPIs"
+git push
+
+echo.
+echo =====================================
 echo Painel atualizado com sucesso!
+echo =====================================
+echo.
+
 pause
