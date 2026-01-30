@@ -1,225 +1,149 @@
-async function carregarJSON(caminho) {
-  try {
-    const r = await fetch(caminho);
-    if (!r.ok) return null;
-    return await r.json();
-  } catch (e) {
-    console.error("Erro ao carregar:", caminho, e);
-    return null;
-  }
+// ======================================================
+// FUNÇÕES AUXILIARES
+// ======================================================
+function carregarJSON(nome) {
+  return fetch("site/dados/" + nome)
+    .then((resp) => resp.json())
+    .catch(() => null);
 }
 
-async function carregarKPIs() {
-  const faturamento = await carregarJSON("site/dados/kpi_faturamento.json");
-  const pedidos = await carregarJSON("site/dados/kpi_quantidade_pedidos.json");
-  const kg = await carregarJSON("site/dados/kpi_kg_total.json");
-  const ticket = await carregarJSON("site/dados/kpi_ticket_medio.json");
-  const preco = await carregarJSON("site/dados/kpi_preco_medio.json");
-
-  return { faturamento, pedidos, kg, ticket, preco };
+function moeda(v) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function atualizarTela(d) {
-  const fat = d.faturamento;
-  const ped = d.pedidos;
-  const kg = d.kg;
-  const ticket = d.ticket;
-  const preco = d.preco;
+function numero(v) {
+  return v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+}
 
-  /* ================================
-     SLIDE 1 - FATURAMENTO
-  ================================= */
-  if (fat && ped) {
-    // Quantidade de pedidos
-    document.getElementById("fatQtdAtual").innerText =
-      ped.atual?.toLocaleString("pt-BR") ?? "--";
+function percentual(v) {
+  return v.toFixed(1).replace(".", ",") + "%";
+}
 
-    document.getElementById("fatQtdAnterior").innerText =
-      ped.ano_anterior?.toLocaleString("pt-BR") ?? "--";
+// ======================================================
+// METAS
+// ======================================================
+const METAS = {
+  1: { kg: 100000, fat: 1324746.56 },
+  2: { kg: 100000, fat: 1324746.56 },
+  3: { kg: 120000, fat: 1598757.69 },
+  4: { kg: 130000, fat: 1910459.23 },
+  5: { kg: 130000, fat: 1892998.21 },
+  6: { kg: 130000, fat: 1892995.74 },
+  7: { kg: 150000, fat: 2199365.46 },
+  8: { kg: 150000, fat: 2199350.47 },
+  9: { kg: 150000, fat: 2199340.46 },
+  10: { kg: 150000, fat: 2199335.81 },
+  11: { kg: 150000, fat: 2199360.62 },
+  12: { kg: 98000, fat: 1409516.02 },
+};
 
-    // Valores de faturamento
-    document.getElementById("fatValorAtual").innerText =
-      fat.atual != null
-        ? `R$ ${fat.atual.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "--";
+// ======================================================
+// CARREGAR JSONs
+// ======================================================
+Promise.all([
+  carregarJSON("kpi_faturamento.json"),
+  carregarJSON("kpi_quantidade_pedidos.json"),
+  carregarJSON("kpi_ticket_medio.json"),
+  carregarJSON("kpi_kg_total.json"),
+  carregarJSON("kpi_preco_medio.json"),
+]).then(([fat, qtd, ticket, kg, preco]) => {
+  if (!fat || !qtd || !ticket || !kg) return;
 
-    document.getElementById("fatValorAnterior").innerText =
-      fat.ano_anterior != null
-        ? `R$ ${fat.ano_anterior.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "--";
+  const dataRef = fat.data_atual;
+  const mes = Number(dataRef.split("/")[1]);
+  const meta = METAS[mes];
 
-    // Datas
-    document.getElementById("fatDataAtual").innerText =
-      fat.data_atual ?? fat.data ?? "--";
+  // ----------------------------------------------------------
+  // SLIDE 1 – FATURAMENTO
+  // ----------------------------------------------------------
+  document.getElementById("fatQtdAtual").innerText =
+    qtd.atual + " pedidos";
 
-    document.getElementById("fatDataAnterior").innerText =
-      fat.data_ano_anterior ?? "--";
+  document.getElementById("fatValorAtual").innerText =
+    moeda(fat.atual);
 
-    // Variação
-    document.getElementById("fatVariacao").innerText =
-      fat.variacao != null ? `${fat.variacao}%` : "--";
+  document.getElementById("fatDataAtual").innerText =
+    `de 01/${dataRef.substring(3)} até ${dataRef}`;
 
-    // Meta faturamento (se existir no JSON)
-    if (fat.meta != null) {
-      document.getElementById("fatMetaValor").innerText = `Meta mês: R$ ${fat.meta.toLocaleString(
-        "pt-BR",
-        { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-      )}`;
-    } else {
-      document.getElementById("fatMetaValor").innerText = "Meta mês: --";
-    }
+  document.getElementById("fatQtdAnterior").innerText =
+    qtd.ano_anterior + " pedidos";
 
-    if (fat.meta_perc != null) {
-      document.getElementById("fatMetaPerc").innerText = `🎯 ${fat.meta_perc}% da meta`;
-    } else if (fat.meta != null && fat.atual != null && fat.meta > 0) {
-      const perc = ((fat.atual / fat.meta) * 100).toFixed(1);
-      document.getElementById("fatMetaPerc").innerText = `🎯 ${perc}% da meta`;
-    } else {
-      document.getElementById("fatMetaPerc").innerText = "🎯 -- % da meta";
-    }
-  }
+  document.getElementById("fatValorAnterior").innerText =
+    moeda(fat.ano_anterior);
 
-  /* ================================
-     SLIDE 2 - KG TOTAL
-  ================================= */
-  if (kg && ped) {
-    document.getElementById("kgQtdAtual").innerText =
-      ped.atual?.toLocaleString("pt-BR") ?? "--";
+  document.getElementById("fatDataAnterior").innerText =
+    `de 01/${fat.data_ano_anterior.substring(3)} até ${fat.data_ano_anterior}`;
 
-    document.getElementById("kgQtdAnterior").innerText =
-      ped.ano_anterior?.toLocaleString("pt-BR") ?? "--";
+  const fatVar = fat.variacao;
+  document.getElementById("fatVariacao").innerText =
+    `${fatVar >= 0 ? "▲" : "▼"} ${percentual(Math.abs(fatVar))} vs ano anterior`;
 
-    document.getElementById("kgValorAtual").innerText =
-      kg.atual != null
-        ? `${kg.atual.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })} kg`
-        : "--";
+  document.getElementById("fatMetaValor").innerText =
+    "Meta mês: " + moeda(meta.fat);
 
-    document.getElementById("kgValorAnterior").innerText =
-      kg.ano_anterior != null
-        ? `${kg.ano_anterior.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })} kg`
-        : "--";
+  document.getElementById("fatMetaPerc").innerText =
+    `🎯 ${percentual(fat.atual / meta.fat * 100)} da meta`;
 
-    // Reaproveito as datas do faturamento (mesmo mês)
-    if (fat) {
-      document.getElementById("kgDataAtual").innerText =
-        fat.data_atual ?? fat.data ?? "--";
-      document.getElementById("kgDataAnterior").innerText =
-        fat.data_ano_anterior ?? "--";
-    } else {
-      document.getElementById("kgDataAtual").innerText = "--";
-      document.getElementById("kgDataAnterior").innerText = "--";
-    }
+  // ----------------------------------------------------------
+  // SLIDE 2 – KG TOTAL
+  // ----------------------------------------------------------
+  document.getElementById("kgQtdAtual").innerText =
+    qtd.atual + " pedidos";
 
-    document.getElementById("kgVariacao").innerText =
-      kg.variacao != null ? `${kg.variacao}%` : "--";
+  document.getElementById("kgValorAtual").innerText =
+    numero(kg.atual) + " kg";
 
-    if (kg.meta != null) {
-      document.getElementById("kgMetaValor").innerText =
-        `Meta mês: ${kg.meta.toLocaleString("pt-BR")} kg`;
-    } else {
-      document.getElementById("kgMetaValor").innerText = "Meta mês: --";
-    }
+  document.getElementById("kgDataAtual").innerText =
+    `de 01/${dataRef.substring(3)} até ${dataRef}`;
 
-    if (kg.meta_perc != null) {
-      document.getElementById("kgMetaPerc").innerText =
-        `🎯 ${kg.meta_perc}% da meta`;
-    } else if (kg.meta != null && kg.atual != null && kg.meta > 0) {
-      const perc = ((kg.atual / kg.meta) * 100).toFixed(1);
-      document.getElementById("kgMetaPerc").innerText =
-        `🎯 ${perc}% da meta`;
-    } else {
-      document.getElementById("kgMetaPerc").innerText =
-        "🎯 -- % da meta";
-    }
-  }
+  document.getElementById("kgQtdAnterior").innerText =
+    qtd.ano_anterior + " pedidos";
 
-  /* ================================
-     SLIDE 3 - TICKET MÉDIO
-  ================================= */
-  if (ticket && ped) {
-    document.getElementById("ticketAtual").innerText =
-      ticket.atual != null
-        ? `R$ ${ticket.atual.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "--";
+  document.getElementById("kgValorAnterior").innerText =
+    numero(kg.ano_anterior) + " kg";
 
-    document.getElementById("ticketAnterior").innerText =
-      ticket.ano_anterior != null
-        ? `R$ ${ticket.ano_anterior.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "--";
+  document.getElementById("kgDataAnterior").innerText =
+    `de 01/${fat.data_ano_anterior.substring(3)} até ${fat.data_ano_anterior}`;
 
-    document.getElementById("ticketQtdAtual").innerText =
-      ped.atual != null
-        ? `${ped.atual.toLocaleString("pt-BR")} pedidos`
-        : "--";
+  document.getElementById("kgVariacao").innerText =
+    `${kg.variacao >= 0 ? "▲" : "▼"} ${percentual(Math.abs(kg.variacao))} vs ano anterior`;
 
-    document.getElementById("ticketQtdAnterior").innerText =
-      ped.ano_anterior != null
-        ? `${ped.ano_anterior.toLocaleString("pt-BR")} pedidos`
-        : "--";
+  document.getElementById("kgMetaValor").innerText =
+    "Meta mês: " + numero(meta.kg) + " kg";
 
-    document.getElementById("ticketVariacao").innerText =
-      ticket.variacao != null ? `${ticket.variacao}%` : "--";
-  }
+  document.getElementById("kgMetaPerc").innerText =
+    `🎯 ${percentual(kg.atual / meta.kg * 100)} da meta`;
 
-  /* ================================
-     SLIDE 4 - PREÇO MÉDIO KG / M²
-  ================================= */
+  // ----------------------------------------------------------
+  // SLIDE 3 – TICKET MÉDIO
+  // ----------------------------------------------------------
+  document.getElementById("ticketAtual").innerText =
+    moeda(ticket.atual);
+
+  document.getElementById("ticketAnterior").innerText =
+    moeda(ticket.ano_anterior);
+
+  document.getElementById("ticketQtdAtual").innerText =
+    qtd.atual + " pedidos no período";
+
+  document.getElementById("ticketQtdAnterior").innerText =
+    qtd.ano_anterior + " pedidos no período";
+
+  document.getElementById("ticketVariacao").innerText =
+    `${ticket.variacao >= 0 ? "▲" : "▼"} ${percentual(Math.abs(ticket.variacao))}`;
+
+  // ----------------------------------------------------------
+  // SLIDE 5 – PREÇOS MÉDIOS
+  // ----------------------------------------------------------
   if (preco) {
-    document.getElementById("precoMedioKg").innerText =
-      preco.preco_medio_kg != null
-        ? `R$ ${preco.preco_medio_kg.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "--";
+    document.getElementById("precoKg").innerText =
+      moeda(preco.preco_medio_kg);
+    document.getElementById("precoKgInfo").innerText =
+      numero(preco.total_kg) + " kg no período";
 
-    document.getElementById("precoMedioM2").innerText =
-      preco.preco_medio_m2 != null
-        ? `R$ ${preco.preco_medio_m2.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "--";
-
-    const dataBase = preco.data ?? "";
-    document.getElementById("precoKgBase").innerText =
-      preco.total_kg != null
-        ? `Base: ${preco.total_kg.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })} kg ${dataBase ? " - " + dataBase : ""}`
-        : "--";
-
-    document.getElementById("precoM2Base").innerText =
-      preco.total_m2 != null
-        ? `Base: ${preco.total_m2.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })} m² ${dataBase ? " - " + dataBase : ""}`
-        : "--";
+    document.getElementById("precoM2").innerText =
+      moeda(preco.preco_medio_m2);
+    document.getElementById("precoM2Info").innerText =
+      numero(preco.total_m2) + " m² no período";
   }
-}
-
-/* INICIAR */
-(async () => {
-  const dados = await carregarKPIs();
-  atualizarTela(dados);
-})();
+});
