@@ -22,6 +22,24 @@ function aplicarCorPosNeg(el, valor) {
   if (valor < 0) el.classList.add("negativo");
 }
 
+/* ============================================================
+   🟧 NOVA FUNÇÃO: CALCULA O INÍCIO DO PERÍODO CORRETO
+   Usa a menor data real do mês disponível no JSON.
+   ============================================================ */
+function obterPrimeiraDataMes(dataStr, listaDatas) {
+  const alvo = dataStr.substring(3); // pega "MM/YYYY"
+  let primeira = null;
+
+  for (const d of listaDatas) {
+    if (!d) continue;
+
+    if (d.substring(3) === alvo) {
+      if (!primeira || d < primeira) primeira = d;
+    }
+  }
+  return primeira ?? ("01/" + alvo);
+}
+
 Promise.all([
   carregarJSON("kpi_faturamento.json"),
   carregarJSON("kpi_quantidade_pedidos.json"),
@@ -30,21 +48,40 @@ Promise.all([
   carregarJSON("kpi_preco_medio.json")
 ]).then(([fat, qtd, ticket, kg, preco]) => {
 
-  /* ================= SLIDE 1 – FAT ================= */
+  /* ============================================================
+     CAPTURA TODAS AS DATAS DISPONÍVEIS PARA CALCULAR O PERÍODO REAL
+     ============================================================ */
+  const datasPossiveis = [];
+
+  if (fat?.data_atual) datasPossiveis.push(fat.data_atual);
+  if (fat?.data_ano_anterior) datasPossiveis.push(fat.data_ano_anterior);
+  if (preco?.data) datasPossiveis.push(preco.data);
+
+  const dataInicio = obterPrimeiraDataMes(fat.data_atual, datasPossiveis);
+  const dataFim = fat.data_atual;
+
+  /* ========================== SLIDE 1 ============================ */
+
   document.getElementById("fatQtdAtual").innerText = qtd.atual + " pedidos";
   document.getElementById("fatValorAtual").innerText = formatarMoeda(fat.atual);
-  document.getElementById("fatDataAtual").innerText = "de 01/" + fat.data_atual.substring(3) + " até " + fat.data_atual;
+  document.getElementById("fatDataAtual").innerText =
+    "de " + dataInicio + " até " + dataFim;
 
-  document.getElementById("fatQtdAnterior").innerText = qtd.ano_anterior + " pedidos";
-  document.getElementById("fatValorAnterior").innerText = formatarMoeda(fat.ano_anterior);
-  document.getElementById("fatDataAnterior").innerText = "de 01/" + fat.data_ano_anterior.substring(3) + " até " + fat.data_ano_anterior;
+  document.getElementById("fatQtdAnterior").innerText =
+    qtd.ano_anterior + " pedidos";
+  document.getElementById("fatValorAnterior").innerText =
+    formatarMoeda(fat.ano_anterior);
+  document.getElementById("fatDataAnterior").innerText =
+    "de 01/" + fat.data_ano_anterior.substring(3) +
+    " até " + fat.data_ano_anterior;
 
   const elFatVar = document.getElementById("fatVariacao");
   const pfFat = fat.variacao >= 0 ? "▲" : "▼";
-  elFatVar.innerText = `${pfFat} ${formatarPercentual(Math.abs(fat.variacao))} vs ano anterior`;
+  elFatVar.innerText =
+    `${pfFat} ${formatarPercentual(Math.abs(fat.variacao))} vs ano anterior`;
   aplicarCorPosNeg(elFatVar, fat.variacao);
 
-  /* Meta fat */
+  /* META FAT */
   const METAS = {
     1: { kg: 100000, fat: 1324746.56 },
     2: { kg: 100000, fat: 1324746.56 },
@@ -62,35 +99,41 @@ Promise.all([
 
   const mes = Number(fat.data_atual.substring(3, 5));
   const metaFat = METAS[mes].fat;
-  const metaFatPerc = (fat.atual / metaFat) * 100;
+  const metaFatPercCalc = (fat.atual / metaFat) * 100;
 
   document.getElementById("fatMetaValor").innerText =
     "Meta mês: " + formatarMoeda(metaFat);
 
-  const elFatMetaPerc = document.getElementById("fatMetaPerc");
-  elFatMetaPerc.innerText =
-    "🎯 " + metaFatPerc.toFixed(1).replace(".", ",") + "% da meta";
+  const elFatMetaPercText = document.getElementById("fatMetaPerc");
+  elFatMetaPercText.innerText =
+    "🎯 " + metaFatPercCalc.toFixed(1).replace(".", ",") + "% da meta";
 
-  elFatMetaPerc.classList.remove("meta-ok", "meta-atencao", "meta-ruim");
-  if (metaFatPerc >= 100) elFatMetaPerc.classList.add("meta-ok");
-  else if (metaFatPerc >= 80) elFatMetaPerc.classList.add("meta-atencao");
-  else elFatMetaPerc.classList.add("meta-ruim");
+  elFatMetaPercText.classList.remove("meta-ok", "meta-atencao", "meta-ruim");
+  if (metaFatPercCalc >= 100) elFatMetaPercText.classList.add("meta-ok");
+  else if (metaFatPercCalc >= 80) elFatMetaPercText.classList.add("meta-atencao");
+  else elFatMetaPercText.classList.add("meta-ruim");
 
-  /* ============== SLIDE 2 – KG TOTAL ============== */
-  const elKgVar = document.getElementById("kgVariacao");
+  /* ======================= SLIDE 2 – KG ======================== */
+
+  const elKgVarHere = document.getElementById("kgVariacao");
   const pfKG = kg.variacao >= 0 ? "▲" : "▼";
+  elKgVarHere.innerText =
+    `${pfKG} ${formatarPercentual(Math.abs(kg.variacao))} vs ano anterior`;
+  aplicarCorPosNeg(elKgVarHere, kg.variacao);
 
   document.getElementById("kgQtdAtual").innerText = qtd.atual + " pedidos";
-  document.getElementById("kgValorAtual").innerText = formatarNumero(kg.atual) + " kg";
-  document.getElementById("kgDataAtual").innerText = "de 01/" + fat.data_atual.substring(3) + " até " + fat.data_atual;
+  document.getElementById("kgValorAtual").innerText =
+    formatarNumero(kg.atual) + " kg";
+  document.getElementById("kgDataAtual").innerText =
+    "de " + dataInicio + " até " + dataFim;
 
-  document.getElementById("kgQtdAnterior").innerText = qtd.ano_anterior + " pedidos";
-  document.getElementById("kgValorAnterior").innerText = formatarNumero(kg.ano_anterior) + " kg";
-  document.getElementById("kgDataAnterior").innerText = "de 01/" + fat.data_ano_anterior.substring(3) + " até " + fat.data_ano_anterior;
-
-  elKgVar.innerText = `${pfKG} ${formatarPercentual(Math.abs(kg.variacao))} vs ano anterior`;
-
-  aplicarCorPosNeg(elKgVar, kg.variacao);
+  document.getElementById("kgQtdAnterior").innerText =
+    qtd.ano_anterior + " pedidos";
+  document.getElementById("kgValorAnterior").innerText =
+    formatarNumero(kg.ano_anterior) + " kg";
+  document.getElementById("kgDataAnterior").innerText =
+    "de 01/" + fat.data_ano_anterior.substring(3) +
+    " até " + fat.data_ano_anterior;
 
   const metaKG = METAS[mes].kg;
   const metaKGperc = (kg.atual / metaKG) * 100;
@@ -98,33 +141,35 @@ Promise.all([
   document.getElementById("kgMetaValor").innerText =
     "Meta mês: " + formatarNumero(metaKG) + " kg";
 
-  const elKgMetaPerc = document.getElementById("kgMetaPerc");
-  elKgMetaPerc.innerText =
+  const elKgMetaPercText = document.getElementById("kgMetaPerc");
+  elKgMetaPercText.innerText =
     "🎯 " + metaKGperc.toFixed(1).replace(".", ",") + "% da meta";
 
-  elKgMetaPerc.classList.remove("meta-ok", "meta-atencao", "meta-ruim");
-  if (metaKGperc >= 100) elKgMetaPerc.classList.add("meta-ok");
-  else if (metaKGperc >= 80) elKgMetaPerc.classList.add("meta-atencao");
-  else elKgMetaPerc.classList.add("meta-ruim");
+  elKgMetaPercText.classList.remove("meta-ok", "meta-atencao", "meta-ruim");
+  if (metaKGperc >= 100) elKgMetaPercText.classList.add("meta-ok");
+  else if (metaKGperc >= 80) elKgMetaPercText.classList.add("meta-atencao");
+  else elKgMetaPercText.classList.add("meta-ruim");
 
-  /* ================= SLIDE 3 – TICKET MÉDIO ================= */
-  const elTicketVar = document.getElementById("ticketVariacao");
-  const pfT = ticket.variacao >= 0 ? "▲" : "▼";
+  /* ==================== SLIDE 3 – TICKET ===================== */
 
-  document.getElementById("ticketAtual").innerText = formatarMoeda(ticket.atual);
-  document.getElementById("ticketAnterior").innerText = formatarMoeda(ticket.ano_anterior);
+  document.getElementById("ticketAtual").innerText =
+    formatarMoeda(ticket.atual);
+  document.getElementById("ticketAnterior").innerText =
+    formatarMoeda(ticket.ano_anterior);
 
   document.getElementById("ticketQtdAtual").innerText =
     qtd.atual + " pedidos no período";
   document.getElementById("ticketQtdAnterior").innerText =
     qtd.ano_anterior + " pedidos no período";
 
+  const elTicketVar = document.getElementById("ticketVariacao");
+  const pfT = ticket.variacao >= 0 ? "▲" : "▼";
   elTicketVar.innerText =
     `${pfT} ${formatarPercentual(Math.abs(ticket.variacao))} vs ano anterior`;
-
   aplicarCorPosNeg(elTicketVar, ticket.variacao);
 
-  /* ================= SLIDE 4 – PREÇO MÉDIO (NOVO!) ================= */
+  /* ==================== SLIDE 4 – PREÇO MÉDIO ================= */
+
   if (preco) {
     document.getElementById("precoMedioKG").innerText =
       "R$ " + preco.preco_medio_kg.toLocaleString("pt-BR");
@@ -132,7 +177,10 @@ Promise.all([
     document.getElementById("precoMedioM2").innerText =
       "R$ " + preco.preco_medio_m2.toLocaleString("pt-BR");
 
-    document.getElementById("precoDataKG").innerText = "Atualizado até " + preco.data;
-    document.getElementById("precoDataM2").innerText = "Atualizado até " + preco.data;
+    document.getElementById("precoDataKG").innerText =
+      "Atualizado até " + preco.data;
+
+    document.getElementById("precoDataM2").innerText =
+      "Atualizado até " + preco.data;
   }
 });
