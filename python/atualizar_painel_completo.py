@@ -17,7 +17,6 @@ def limpar_numero(valor):
     if v in ["", "-", ",", ".", ",-", ".-"]:
         return 0.0
 
-    # Caso com milhares + vírgula decimal (ex: 1.234.567,89)
     if "." in v and "," in v:
         v = v.replace(".", "")
         v = v.replace(",", ".")
@@ -26,7 +25,6 @@ def limpar_numero(valor):
         except:
             return 0.0
 
-    # Apenas vírgula decimal
     if "," in v and "." not in v:
         v = v.replace(",", ".")
         try:
@@ -34,10 +32,9 @@ def limpar_numero(valor):
         except:
             return 0.0
 
-    # Apenas ponto -> verificar se é milhares ou decimal
     if "." in v and "," not in v:
         partes = v.split(".")
-        if len(partes[-1]) == 3:  # 12.345 → remover ponto
+        if len(partes[-1]) == 3:
             v = v.replace(".", "")
         try:
             return float(v)
@@ -51,27 +48,24 @@ def limpar_numero(valor):
 
 
 # ======================================================
-# CARREGA PLANILHA E NORMALIZA
+# CARREGAR EXCEL — AGORA REMOVENDO LINHAS INVÁLIDAS
 # ======================================================
 def carregar_excel():
     df = pd.read_excel("excel/PEDIDOS ONDA.xlsx")
 
     df.columns = df.columns.str.strip().str.upper()
 
-    # 🔥 PRINCIPAL CORREÇÃO:
-    # Aceitar qualquer variação existente no Excel:
-    possiveis_colunas = ["VALOR COM IPI", "VALOR COM IPI ", "VALOR  COM  IPI", "VALOR COM I.P.I"]
+    # Identifica automaticamente a coluna VALOR COM IPI
     nome_valor_ipi = None
-
     for c in df.columns:
         if "VALOR" in c and "IPI" in c:
             nome_valor_ipi = c
             break
 
     if nome_valor_ipi is None:
-        raise Exception("❌ Não encontrei a coluna de VALOR COM IPI no Excel!")
+        raise Exception("❌ Não encontrei a coluna VALOR COM IPI no Excel")
 
-    # Padroniza para um único nome interno
+    # Renomeia para um nome fixo
     df = df.rename(columns={nome_valor_ipi: "VALOR COM IPI"})
 
     obrigatorias = ["DATA", "VALOR COM IPI", "KG", "TOTAL M2"]
@@ -79,8 +73,14 @@ def carregar_excel():
         if c not in df.columns:
             raise Exception(f"❌ Coluna obrigatória não encontrada: {c}")
 
+    # Converte datas corretamente
     df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
 
+    # 🔥 REMOVE LINHAS RUINS COM DATA NULA OU 1900:
+    df = df[df["DATA"].notna()]
+    df = df[df["DATA"].dt.year >= 2000]   # evita lixo tipo 00/01/1900
+
+    # Limpa valores
     df["VALOR COM IPI"] = df["VALOR COM IPI"].apply(limpar_numero)
     df["KG"] = df["KG"].apply(limpar_numero)
     df["TOTAL M2"] = df["TOTAL M2"].apply(limpar_numero)
@@ -89,12 +89,10 @@ def carregar_excel():
 
 
 # ======================================================
-# DATA DE REFERÊNCIA
+# ÚLTIMA DATA VÁLIDA
 # ======================================================
 def obter_data_ref(df):
     datas = df["DATA"].dropna()
-    if datas.empty:
-        raise Exception("❌ Nenhuma data válida encontrada.")
     return datas.max()
 
 
@@ -126,7 +124,7 @@ def calcular_kpis_padrao(df, data_ref):
             "ano_anterior": round(fat_ant, 2),
             "variacao": ((fat_atual / fat_ant - 1) * 100) if fat_ant else 0,
             "data_atual": data_ref.strftime("%d/%m/%Y"),
-            "data_ano_anterior": data_ref.replace(year=ano - 1).strftime("%d/%m/%Y")
+            "data_ano_anterior": data_ref.replace(year=data_ref.year - 1).strftime("%d/%m/%Y")
         },
         "kg": {
             "atual": round(kg_atual, 2),
@@ -172,18 +170,17 @@ def calcular_preco_medio(df, data_ref):
 
 
 # ======================================================
-# SALVAR JSON
+# SALVAR JSONS
 # ======================================================
 def salvar(nome, dados):
     with open(f"dados/{nome}", "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
-
     with open(f"site/dados/{nome}", "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
 
 
 # ======================================================
-# EXECUÇÃO
+# EXECUTAR
 # ======================================================
 if __name__ == "__main__":
     df = carregar_excel()
