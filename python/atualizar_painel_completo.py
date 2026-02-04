@@ -31,7 +31,7 @@ def carregar_excel():
     df = pd.read_excel(CAMINHO_EXCEL)
     df.columns = df.columns.str.strip().str.upper()
 
-    obrigatorias = ["DATA", "VALOR COM IPI", "KG", "TOTAL M2"]
+    obrigatorias = ["DATA", "PEDIDO", "VALOR COM IPI", "KG", "TOTAL M2"]
     for c in obrigatorias:
         if c not in df.columns:
             raise Exception(f"❌ Coluna obrigatória ausente: {c}")
@@ -61,9 +61,8 @@ def calcular_kpis(df):
 
     # ===== ATUAL =====
     df_atual = df[(df["DATA"] >= inicio) & (df["DATA"] <= fim)].copy()
-    df_atual = df_atual.reset_index(drop=True)
 
-    qtd_atual = len(df_atual)
+    qtd_atual = df_atual["PEDIDO"].nunique()
     fat_atual = df_atual["VALOR COM IPI"].sum()
     kg_atual = df_atual["KG"].sum()
     m2_atual = df_atual["TOTAL M2"].sum()
@@ -73,9 +72,8 @@ def calcular_kpis(df):
     fim_ant = fim.replace(year=fim.year - 1)
 
     df_ant = df[(df["DATA"] >= inicio_ant) & (df["DATA"] <= fim_ant)].copy()
-    df_ant = df_ant.reset_index(drop=True)
 
-    qtd_ant = len(df_ant)
+    qtd_ant = df_ant["PEDIDO"].nunique()
     fat_ant = df_ant["VALOR COM IPI"].sum()
     kg_ant = df_ant["KG"].sum()
     m2_ant = df_ant["TOTAL M2"].sum()
