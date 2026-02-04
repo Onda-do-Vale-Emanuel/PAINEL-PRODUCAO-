@@ -23,7 +23,7 @@ def carregar_excel():
     df = pd.read_excel(CAMINHO_EXCEL)
     df.columns = df.columns.str.upper().str.strip()
 
-    obrig = ["DATA", "PEDIDO", "VALOR COM IPI", "KG", "TOTAL M2"]
+    obrig = ["DATA", "PEDIDO", "TIPO DE PEDIDO", "VALOR COM IPI", "KG", "TOTAL M2"]
     for c in obrig:
         if c not in df.columns:
             raise Exception(f"Coluna obrigatória ausente: {c}")
@@ -35,13 +35,16 @@ def carregar_excel():
     df["KG"] = df["KG"].apply(limpar_numero)
     df["TOTAL M2"] = df["TOTAL M2"].apply(limpar_numero)
 
+    # 🔥 FILTRO IGUAL AO EXCEL
+    df["TIPO DE PEDIDO"] = df["TIPO DE PEDIDO"].astype(str).str.upper().str.strip()
+    df = df[df["TIPO DE PEDIDO"] == "NORMAL"]
+
     return df
 
-# ================= CÁLCULO PRINCIPAL =================
+# ================= CÁLCULO =================
 def calcular(df):
     ultima = df["DATA"].max()
 
-    # mês atual
     df_mes = df[
         (df["DATA"].dt.year == ultima.year) &
         (df["DATA"].dt.month == ultima.month)
@@ -49,11 +52,10 @@ def calcular(df):
 
     inicio_mes = df_mes["DATA"].min()
 
-    # período correto
     df_periodo = df[(df["DATA"] >= inicio_mes) & (df["DATA"] <= ultima)]
 
-    # >>> PEDIDOS ÚNICOS <<<
-    pedidos_unicos = df_periodo["PEDIDO"].nunique()
+    # PEDIDOS ÚNICOS (igual Excel)
+    pedidos_atual = df_periodo["PEDIDO"].nunique()
 
     total_valor = df_periodo["VALOR COM IPI"].sum()
     total_kg = df_periodo["KG"].sum()
@@ -62,7 +64,7 @@ def calcular(df):
     preco_kg = round(total_valor / total_kg, 2) if total_kg else 0
     preco_m2 = round(total_valor / total_m2, 2) if total_m2 else 0
 
-    # ===== ano anterior =====
+    # ===== ANO ANTERIOR =====
     inicio_ant = inicio_mes.replace(year=inicio_mes.year - 1)
     fim_ant = ultima.replace(year=ultima.year - 1)
 
@@ -84,9 +86,9 @@ def calcular(df):
             "data_ano_anterior": fim_ant.strftime("%d/%m/%Y")
         },
         "qtd": {
-            "atual": pedidos_unicos,
+            "atual": pedidos_atual,
             "ano_anterior": pedidos_ant,
-            "variacao": ((pedidos_unicos / pedidos_ant - 1) * 100) if pedidos_ant else 0
+            "variacao": ((pedidos_atual / pedidos_ant - 1) * 100) if pedidos_ant else 0
         },
         "kg": {
             "atual": round(total_kg, 2),
@@ -94,10 +96,10 @@ def calcular(df):
             "variacao": ((total_kg / kg_ant - 1) * 100) if kg_ant else 0
         },
         "ticket": {
-            "atual": round(total_valor / pedidos_unicos, 2) if pedidos_unicos else 0,
+            "atual": round(total_valor / pedidos_atual, 2) if pedidos_atual else 0,
             "ano_anterior": round(valor_ant / pedidos_ant, 2) if pedidos_ant else 0,
             "variacao": (
-                ((total_valor / pedidos_unicos) /
+                ((total_valor / pedidos_atual) /
                  (valor_ant / pedidos_ant) - 1) * 100
             ) if pedidos_ant else 0
         },
@@ -110,7 +112,7 @@ def calcular(df):
         }
     }
 
-# ================= SALVAR JSON =================
+# ================= SALVAR =================
 def salvar(nome, dados):
     with open(f"dados/{nome}", "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
