@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 import re
-from datetime import datetime
 
 CAMINHO_EXCEL = "excel/PEDIDOS ONDA.xlsx"
 
@@ -48,63 +47,64 @@ def carregar_excel():
 def obter_periodo(df):
     ultima = df["DATA"].max()
     df_mes = df[(df["DATA"].dt.year == ultima.year) & (df["DATA"].dt.month == ultima.month)]
-    primeira_real = df_mes["DATA"].min()
-    inicio_mes_exibicao = primeira_real.replace(day=1)
-    return primeira_real, ultima, inicio_mes_exibicao
+    primeira = df_mes["DATA"].min()
+    inicio_mes = primeira.replace(day=1)
+    return primeira, ultima, inicio_mes
 
 # ==============================
-# CALCULAR KPIs
+# EXECUÇÃO
 # ==============================
 def calcular(df):
     primeira, ultima, inicio_mes = obter_periodo(df)
 
-    df_periodo = df[(df["DATA"] >= primeira) & (df["DATA"] <= ultima)]
-
-    # 🔴 CORREÇÃO PRINCIPAL AQUI
-    qtd = df_periodo["PEDIDO"].nunique()
-
-    total_valor = df_periodo["VALOR COM IPI"].sum()
-    total_kg = df_periodo["KG"].sum()
-    total_m2 = df_periodo["TOTAL M2"].sum()
-
-    preco_kg = round(total_valor / total_kg, 2) if total_kg else 0
-    preco_m2 = round(total_valor / total_m2, 2) if total_m2 else 0
-
-    # Ano anterior
+    df_atual = df[(df["DATA"] >= primeira) & (df["DATA"] <= ultima)]
     ano_ant = primeira.year - 1
     df_ant = df[
         (df["DATA"] >= primeira.replace(year=ano_ant)) &
         (df["DATA"] <= ultima.replace(year=ano_ant))
     ]
 
+    qtd_atual = df_atual["PEDIDO"].nunique()
     qtd_ant = df_ant["PEDIDO"].nunique()
-    total_valor_ant = df_ant["VALOR COM IPI"].sum()
-    total_kg_ant = df_ant["KG"].sum()
+
+    fat_atual = df_atual["VALOR COM IPI"].sum()
+    fat_ant = df_ant["VALOR COM IPI"].sum()
+
+    kg_atual = df_atual["KG"].sum()
+    kg_ant = df_ant["KG"].sum()
+
+    ticket_atual = fat_atual / qtd_atual if qtd_atual else 0
+    ticket_ant = fat_ant / qtd_ant if qtd_ant else 0
+
+    total_m2 = df_atual["TOTAL M2"].sum()
 
     return {
         "faturamento": {
-            "atual": round(total_valor, 2),
-            "ano_anterior": round(total_valor_ant, 2),
-            "variacao": ((total_valor / total_valor_ant) - 1) * 100 if total_valor_ant else 0,
-            "inicio_mes": inicio_mes.strftime("%d/%m/%Y"),
-            "data": ultima.strftime("%d/%m/%Y"),
-            "inicio_mes_anterior": inicio_mes.replace(year=ano_ant).strftime("%d/%m/%Y"),
+            "atual": round(fat_atual, 2),
+            "ano_anterior": round(fat_ant, 2),
+            "variacao": ((fat_atual / fat_ant) - 1) * 100 if fat_ant else 0,
+            "data_atual": ultima.strftime("%d/%m/%Y"),
             "data_ano_anterior": ultima.replace(year=ano_ant).strftime("%d/%m/%Y")
         },
         "quantidade": {
-            "atual": qtd,
+            "atual": qtd_atual,
             "ano_anterior": qtd_ant,
-            "variacao": ((qtd / qtd_ant) - 1) * 100 if qtd_ant else 0
+            "variacao": ((qtd_atual / qtd_ant) - 1) * 100 if qtd_ant else 0
         },
         "kg": {
-            "atual": round(total_kg, 2),
-            "ano_anterior": round(total_kg_ant, 2),
-            "variacao": ((total_kg / total_kg_ant) - 1) * 100 if total_kg_ant else 0
+            "atual": round(kg_atual, 2),
+            "ano_anterior": round(kg_ant, 2),
+            "variacao": ((kg_atual / kg_ant) - 1) * 100 if kg_ant else 0
+        },
+        "ticket": {
+            "atual": round(ticket_atual, 2),
+            "ano_anterior": round(ticket_ant, 2),
+            "variacao": ((ticket_atual / ticket_ant) - 1) * 100 if ticket_ant else 0
         },
         "preco": {
-            "preco_medio_kg": preco_kg,
-            "preco_medio_m2": preco_m2,
-            "total_kg": round(total_kg, 2),
+            "preco_medio_kg": round(fat_atual / kg_atual, 2) if kg_atual else 0,
+            "preco_medio_m2": round(fat_atual / total_m2, 2) if total_m2 else 0,
+            "total_kg": round(kg_atual, 2),
             "total_m2": round(total_m2, 2),
             "data": ultima.strftime("%d/%m/%Y")
         }
@@ -120,7 +120,7 @@ def salvar(nome, dados):
         json.dump(dados, f, ensure_ascii=False, indent=2)
 
 # ==============================
-# EXECUÇÃO
+# MAIN
 # ==============================
 if __name__ == "__main__":
     df = carregar_excel()
@@ -129,9 +129,10 @@ if __name__ == "__main__":
     salvar("kpi_faturamento.json", res["faturamento"])
     salvar("kpi_quantidade_pedidos.json", res["quantidade"])
     salvar("kpi_kg_total.json", res["kg"])
+    salvar("kpi_ticket_medio.json", res["ticket"])
     salvar("kpi_preco_medio.json", res["preco"])
 
     print("=====================================")
     print(f"Pedidos atuais: {res['quantidade']['atual']}")
-    print(f"Período: {res['faturamento']['inicio_mes']} → {res['faturamento']['data']}")
+    print(f"Período: 01/{res['faturamento']['data_atual'][3:]} → {res['faturamento']['data_atual']}")
     print("=====================================")
