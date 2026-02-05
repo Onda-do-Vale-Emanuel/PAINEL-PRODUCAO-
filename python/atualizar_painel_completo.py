@@ -6,7 +6,7 @@ from datetime import datetime
 CAMINHO_EXCEL = "excel/PEDIDOS ONDA.xlsx"
 
 # ======================================================
-# LIMPA NÚMEROS ESTILO BRASIL (À PROVA DE ERRO)
+# LIMPA NÚMEROS BRASILEIROS (NÃO USADO PARA PEDIDO!)
 # ======================================================
 def limpar_numero(v):
     if pd.isna(v):
@@ -14,23 +14,14 @@ def limpar_numero(v):
 
     v = str(v).strip()
 
-    # Remove todos caracteres que NÃO sejam dígitos, vírgula ou ponto
     v = re.sub(r"[^0-9,.-]", "", v)
-
-    # Ex: "2026-02-03151642" vira "20260203151642"
-    # Se sobrar só números sem vírgula/ponto -> considerar erro -> 0
-    if re.fullmatch(r"[0-9]+", v):
-        # Se for absurdamente grande, também zeramos
-        if len(v) > 7:  
-            return 0.0
-        return float(v)
 
     if v in ["", "-", ".", ","]:
         return 0.0
 
-    # caso padrão BR 12.345,67
     if "." in v and "," in v:
         v = v.replace(".", "").replace(",", ".")
+
     elif "," in v:
         v = v.replace(",", ".")
 
@@ -41,7 +32,7 @@ def limpar_numero(v):
 
 
 # ======================================================
-# CARREGA E NORMALIZA PLANILHA
+# CARREGAR PLANILHA
 # ======================================================
 def carregar():
     df = pd.read_excel(CAMINHO_EXCEL)
@@ -50,24 +41,25 @@ def carregar():
     obrig = ["PEDIDO", "DATA", "VALOR COM IPI", "KG", "TOTAL M2"]
     for c in obrig:
         if c not in df.columns:
-            raise Exception(f"Coluna ausente: {c}")
+            raise Exception(f"Faltando coluna: {c}")
 
+    # datas
     df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
     df = df[df["DATA"].notna()]
 
-    # NORMALIZA NÚMEROS
-    for c in ["VALOR COM IPI", "KG", "TOTAL M2"]:
-        df[c] = df[c].apply(limpar_numero)
+    # TRATAR PEDIDO COMO STRING SEMPRE
+    df["PEDIDO"] = df["PEDIDO"].astype(str).str.strip()
 
-    # Normalizar número do pedido → extrair só números
-    df["PEDIDO"] = df["PEDIDO"].astype(str)
-    df["PEDIDO"] = df["PEDIDO"].apply(lambda x: re.sub(r"[^0-9]", "", x))
+    # limpar numéricos (somente onde necessário!)
+    df["VALOR COM IPI"] = df["VALOR COM IPI"].apply(limpar_numero)
+    df["KG"] = df["KG"].apply(limpar_numero)
+    df["TOTAL M2"] = df["TOTAL M2"].apply(limpar_numero)
 
     return df
 
 
 # ======================================================
-# CALCULA TODOS OS KPIS
+# KPIS
 # ======================================================
 def calcular(df):
     ultima = df["DATA"].max()
@@ -75,43 +67,43 @@ def calcular(df):
     mes = ultima.month
 
     df_mes = df[(df["DATA"].dt.year == ano) & (df["DATA"].dt.month == mes)]
-    primeira_com_pedido = df_mes["DATA"].min()
-
-    if primeira_com_pedido is None:
+    if df_mes.empty:
         return None
 
-    inicio_exib_atual = ultima.replace(day=1)
-    inicio_exib_ant = inicio_exib_atual.replace(year=ano - 1)
+    primeira_real = df_mes["DATA"].min()
 
-    df_periodo = df[(df["DATA"] >= primeira_com_pedido) & (df["DATA"] <= ultima)]
+    # Para exibição no site → sempre 01/MM
+    inicio_exib = datetime(ano, mes, 1)
+    inicio_exib_ant = datetime(ano - 1, mes, 1)
+
+    # Filtragem real
+    df_periodo = df[(df["DATA"] >= primeira_real) & (df["DATA"] <= ultima)]
 
     qtd = df_periodo["PEDIDO"].nunique()
     total = df_periodo["VALOR COM IPI"].sum()
     kg = df_periodo["KG"].sum()
     m2 = df_periodo["TOTAL M2"].sum()
 
-    inicio_real_ant = primeira_com_pedido.replace(year=ano - 1)
-    fim_ant = ultima.replace(year=ano - 1)
+    # Ano anterior
+    primeira_ant = primeira_real.replace(year=ano - 1)
+    ultima_ant = ultima.replace(year=ano - 1)
 
-    df_ant = df[(df["DATA"] >= inicio_real_ant) & (df["DATA"] <= fim_ant)]
+    df_ant = df[(df["DATA"] >= primeira_ant) & (df["DATA"] <= ultima_ant)]
 
     qtd_ant = df_ant["PEDIDO"].nunique()
     total_ant = df_ant["VALOR COM IPI"].sum()
     kg_ant = df_ant["KG"].sum()
     m2_ant = df_ant["TOTAL M2"].sum()
 
-    ticket_atual = total / qtd if qtd else 0
-    ticket_ant = total_ant / qtd_ant if qtd_ant else 0
-
     return {
         "fat": {
             "atual": round(total, 2),
             "ano_anterior": round(total_ant, 2),
             "variacao": ((total / total_ant) - 1) * 100 if total_ant else 0,
+            "inicio_mes": inicio_exib.strftime("%d/%m/%Y"),
             "data_atual": ultima.strftime("%d/%m/%Y"),
-            "inicio_mes": inicio_exib_atual.strftime("%d/%m/%Y"),
-            "data_ano_anterior": fim_ant.strftime("%d/%m/%Y"),
-            "inicio_mes_anterior": inicio_exib_ant.strftime("%d/%m/%Y")
+            "inicio_mes_anterior": inicio_exib_ant.strftime("%d/%m/%Y"),
+            "data_ano_anterior": ultima_ant.strftime("%d/%m/%Y")
         },
         "qtd": {
             "atual": int(qtd),
@@ -124,9 +116,9 @@ def calcular(df):
             "variacao": ((kg / kg_ant) - 1) * 100 if kg_ant else 0
         },
         "ticket": {
-            "atual": round(ticket_atual, 2),
-            "ano_anterior": round(ticket_ant, 2),
-            "variacao": ((ticket_atual / ticket_ant) - 1) * 100 if ticket_ant else 0
+            "atual": round(total / qtd, 2) if qtd else 0,
+            "ano_anterior": round(total_ant / qtd_ant, 2) if qtd_ant else 0,
+            "variacao": (((total / qtd) / (total_ant / qtd_ant)) - 1) * 100 if qtd_ant else 0
         },
         "preco": {
             "preco_medio_kg": round(total / kg, 2) if kg else 0,
@@ -139,7 +131,7 @@ def calcular(df):
 
 
 # ======================================================
-# SALVA JSON
+# SALVAR JSONS
 # ======================================================
 def salvar(nome, dados):
     with open(f"dados/{nome}", "w", encoding="utf-8") as f:
@@ -161,6 +153,6 @@ if __name__ == "__main__":
     salvar("kpi_ticket_medio.json", res["ticket"])
     salvar("kpi_preco_medio.json", res["preco"])
 
-    print("\n✓ JSON gerado com sucesso!")
+    print("✓ JSON atualizado corretamente!")
     print("Pedidos atuais:", res["qtd"]["atual"])
-    print("Período exibido:", res["fat"]["inicio_mes"], "→", res["fat"]["data_atual"])
+    print("Período mostrado no site:", res["fat"]["inicio_mes"], "→", res["fat"]["data_atual"])
