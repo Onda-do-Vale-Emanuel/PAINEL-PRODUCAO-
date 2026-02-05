@@ -4,169 +4,106 @@ from datetime import datetime
 
 CAMINHO = "excel/PEDIDOS ONDA.xlsx"
 
-# ================================================================
-# LIMPA NÚMEROS BRASILEIROS
-# ================================================================
+# ------------------- LIMPEZA NUMÉRICA -------------------
 def limpar_numero(v):
     if pd.isna(v):
         return 0.0
-    v = str(v).strip()
-    v = re.sub(r"[^0-9,.-]", "", v)
 
-    if v in ["", "-", ".", ","]:
+    v = str(v).strip()
+
+    # ❗ IGNORAR VALORES QUE PARECEM DATA-CONCATENADA
+    # Exemplo errado: 2026-02-03151642
+    if re.match(r"^\d{4}-\d{2}-\d{2}\d+$", v):
         return 0.0
 
-    # 1.234.567,89
+    # remover letras e símbolos, exceto . , -
+    v = re.sub(r"[^0-9,.-]", "", v)
+
+    if v in ["", "-", ".", ",", ",-", ".-"]:
+        return 0.0
+
+    # formato 1.234.567,89
     if "." in v and "," in v:
-        return float(v.replace(".", "").replace(",", "."))
+        v = v.replace(".", "").replace(",", ".")
+        try:
+            return float(v)
+        except:
+            return 0.0
 
-    # 123,45
+    # formato 123,45
     if "," in v:
-        return float(v.replace(",", "."))
+        try:
+            return float(v.replace(",", "."))
+        except:
+            return 0.0
 
+    # formato 1234.56 ou erro
     try:
         return float(v)
     except:
         return 0.0
 
+# ------------------- CARREGAR EXCEL -------------------
+df = pd.read_excel(CAMINHO)
+df.columns = df.columns.str.upper().str.strip()
 
-# ================================================================
-# CARREGAR PLANILHA
-# ================================================================
-def carregar_excel():
-    df = pd.read_excel(CAMINHO)
-    df.columns = df.columns.str.upper().str.strip()
+df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
+df = df[df["DATA"].notna()]
 
-    obrig = ["PEDIDO", "DATA", "VALOR COM IPI", "KG", "TOTAL M2"]
-    for c in obrig:
-        if c not in df.columns:
-            raise Exception(f"❌ Coluna ausente: {c}")
+df["VALOR COM IPI"] = df["VALOR COM IPI"].apply(limpar_numero)
+df["KG"] = df["KG"].apply(limpar_numero)
+df["TOTAL M2"] = df["TOTAL M2"].apply(limpar_numero)
 
-    df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
-    df = df[df["DATA"].notna()]
+# ------------------- PERÍODO ATUAL -------------------
+ultima_data = df["DATA"].max()
+ano_atual = ultima_data.year
+mes_atual = ultima_data.month
 
-    df["VALOR COM IPI"] = df["VALOR COM IPI"].apply(limpar_numero)
-    df["KG"] = df["KG"].apply(limpar_numero)
-    df["TOTAL M2"] = df["TOTAL M2"].apply(limpar_numero)
+df_mes_atual = df[(df["DATA"].dt.year == ano_atual) & (df["DATA"].dt.month == mes_atual)]
 
-    df["PEDIDO"] = df["PEDIDO"].astype(str)
-    return df
+primeira_data_atual = df_mes_atual["DATA"].min()
+ultima_data_atual = df_mes_atual["DATA"].max()
 
+df_periodo_atual = df[(df["DATA"] >= primeira_data_atual) & (df["DATA"] <= ultima_data_atual)]
 
-# ================================================================
-# REGRA DEFINITIVA DO PERÍODO PARA AMBOS OS ANOS
-# ================================================================
-def obter_periodo(df):
-    hoje = datetime.now()
-    ano = hoje.year
-    mes = hoje.month
+# ------------------- PERÍODO ANO ANTERIOR -------------------
+ano_ant = ano_atual - 1
 
-    # ==== Ano Atual ====
-    df_atual_mes = df[(df["DATA"].dt.year == ano) & (df["DATA"].dt.month == mes)]
+primeira_ant = primeira_data_atual.replace(year=ano_ant)
+ultima_ant = ultima_data_atual.replace(year=ano_ant)
 
-    primeira_real_atual = df_atual_mes["DATA"].min()
-    ultima_real_atual = df_atual_mes["DATA"].max()
+# Caso a data do ano anterior não exista, usa a última data válida do mês
+datas_ant_mes = df[(df["DATA"].dt.year == ano_ant) & (df["DATA"].dt.month == mes_atual)]["DATA"]
 
-    # ==== Ano Anterior ====
-    df_ant_mes = df[(df["DATA"].dt.year == ano - 1) & (df["DATA"].dt.month == mes)]
+if datas_ant_mes.empty:
+    # não existem pedidos no mês inteiro do ano anterior
+    df_periodo_ant = df[df["DATA"].dt.year == ano_ant].iloc[0:0]
+else:
+    ultima_ant_real = datas_ant_mes.max()
+    if ultima_ant > ultima_ant_real:
+        ultima_ant = ultima_ant_real
+    df_periodo_ant = df[(df["DATA"] >= primeira_ant) & (df["DATA"] <= ultima_ant)]
 
-    # primeiro dia real igual ao atual, apenas troca ano
-    primeira_ant = primeira_real_atual.replace(year=ano - 1)
-
-    # último dia real: só usa se existir pedido nesse dia no ano anterior
-    ultima_alvo_ant = ultima_real_atual.replace(year=ano - 1)
-
-    if ultima_alvo_ant in df_ant_mes["DATA"].values:
-        ultima_ant = ultima_alvo_ant
-    else:
-        ultima_ant = df_ant_mes["DATA"].max()
-
+# ------------------- CÁLCULOS -------------------
+def calcular(dfp):
     return {
-        "primeira_atual": primeira_real_atual,
-        "ultima_atual": ultima_real_atual,
-        "primeira_ant": primeira_ant,
-        "ultima_ant": ultima_ant
+        "pedidos": len(dfp),
+        "fat": dfp["VALOR COM IPI"].sum(),
+        "kg": dfp["KG"].sum(),
+        "m2": dfp["TOTAL M2"].sum(),
+        "ticket": (dfp["VALOR COM IPI"].sum() / len(dfp)) if len(dfp) else 0
     }
 
+res_atual = calcular(df_periodo_atual)
+res_ant = calcular(df_periodo_ant)
 
-# ================================================================
-# CALCULAR OS KPIs
-# ================================================================
-def calcular(df):
-    periodo = obter_periodo(df)
+# ------------------- MOSTRAR RESULTADOS -------------------
+print("\n==================== RESULTADOS ====================\n")
 
-    p_atual_ini = periodo["primeira_atual"]
-    p_atual_fim = periodo["ultima_atual"]
+print(f"📅 ATUAL     : {primeira_data_atual.strftime('%d/%m/%Y')} → {ultima_data_atual.strftime('%d/%m/%Y')}")
+print(res_atual)
 
-    p_ant_ini = periodo["primeira_ant"]
-    p_ant_fim = periodo["ultima_ant"]
+print(f"\n📅 ANTERIOR  : {primeira_ant.strftime('%d/%m/%Y')} → {ultima_ant.strftime('%d/%m/%Y')}")
+print(res_ant)
 
-    # ---------------- ATUAL ----------------
-    df_atual = df[(df["DATA"] >= p_atual_ini) & (df["DATA"] <= p_atual_fim)]
-
-    total_atual = df_atual["VALOR COM IPI"].sum()
-    kg_atual = df_atual["KG"].sum()
-    m2_atual = df_atual["TOTAL M2"].sum()
-    qtd_atual = df_atual["PEDIDO"].nunique()
-
-    # ---------------- ANO ANTERIOR ----------------
-    df_ant = df[(df["DATA"] >= p_ant_ini) & (df["DATA"] <= p_ant_fim)]
-
-    total_ant = df_ant["VALOR COM IPI"].sum()
-    kg_ant = df_ant["KG"].sum()
-    m2_ant = df_ant["TOTAL M2"].sum()
-    qtd_ant = df_ant["PEDIDO"].nunique()
-
-    # ---------------- TICKET ----------------
-    ticket_atual = total_atual / qtd_atual if qtd_atual else 0
-    ticket_ant = total_ant / qtd_ant if qtd_ant else 0
-
-    # ---------------- PREÇO MÉDIO ----------------
-    preco_kg = total_atual / kg_atual if kg_atual else 0
-    preco_m2 = total_atual / m2_atual if m2_atual else 0
-
-    return {
-        "periodo": {
-            "atual_inicio": p_atual_ini.strftime("%d/%m/%Y"),
-            "atual_fim": p_atual_fim.strftime("%d/%m/%Y"),
-            "ant_inicio": p_ant_ini.strftime("%d/%m/%Y"),
-            "ant_fim": p_ant_fim.strftime("%d/%m/%Y"),
-        },
-        "atual": {
-            "pedidos": qtd_atual,
-            "fat": round(total_atual, 2),
-            "kg": round(kg_atual, 2),
-            "m2": round(m2_atual, 2),
-            "ticket": round(ticket_atual, 2),
-            "preco_kg": round(preco_kg, 2),
-            "preco_m2": round(preco_m2, 2)
-        },
-        "anterior": {
-            "pedidos": qtd_ant,
-            "fat": round(total_ant, 2),
-            "kg": round(kg_ant, 2),
-            "m2": round(m2_ant, 2),
-            "ticket": round(ticket_ant, 2)
-        }
-    }
-
-
-# ================================================================
-# EXECUÇÃO
-# ================================================================
-if __name__ == "__main__":
-    df = carregar_excel()
-    r = calcular(df)
-
-    print("\n================== RESULTADOS ==================\n")
-
-    print("📅 ATUAL :", r["periodo"]["atual_inicio"], "→", r["periodo"]["atual_fim"])
-    print("📅 ANTERIOR :", r["periodo"]["ant_inicio"], "→", r["periodo"]["ant_fim"])
-
-    print("\n--- ATUAL ---")
-    print(r["atual"])
-
-    print("\n--- ANTERIOR ---")
-    print(r["anterior"])
-
-    print("\n================================================\n")
+print("\n====================================================\n")
