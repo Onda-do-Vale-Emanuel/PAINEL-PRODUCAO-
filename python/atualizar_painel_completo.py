@@ -1,280 +1,161 @@
 import pandas as pd
 import json
 import re
-import math
-from datetime import datetime, date
-import calendar
+from datetime import datetime
 
 CAMINHO_EXCEL = "excel/PEDIDOS ONDA.xlsx"
 
-
 # ======================================================
-# FUNÇÃO ROBUSTA PARA NÚMEROS BRASILEIROS + LIXO
+# 🔥 FUNÇÃO DEFINITIVA PARA LER NÚMEROS BRASILEIROS
 # ======================================================
-def limpar_numero(valor):
-    """
-    Converte textos variados em número float.
-    Trata:
-    - "1.234.567,89"
-    - "1.234"
-    - "1,234"
-    - "1234"
-    - "R$ 1.234,99"
-    - E ignora lixos tipo "2026-02-03151642".
-    """
-    if pd.isna(valor):
+def limpar_numero(v):
+    if pd.isna(v):
         return 0.0
-
-    v = str(valor).strip()
-
-    # Mantém só dígitos, vírgula, ponto e hífen
-    v = re.sub(r"[^0-9,.\-]", "", v)
-
-    # Vazio ou símbolos soltos
-    if v in ("", "-", ",", ".", ",-", ".-"):
+    v = str(v).strip()
+    v = re.sub(r"[^0-9,.-]", "", v)
+    if v in ["", "-", ",", ".", ",-", ".-"]:
         return 0.0
-
-    # Se tiver vários hífens, é forte candidato a data/ID, não número
-    if v.count("-") >= 2:
-        return 0.0
-
-    # Caso tenha "." e "," → formato “1.234.567,89”
     if "." in v and "," in v:
-        v = v.replace(".", "").replace(",", ".")
-    elif "," in v:
-        # Só vírgula → decimal brasileiro
-        v = v.replace(",", ".")
-    else:
-        # Só ponto: decidir se é milhar ou decimal
-        if "." in v:
-            partes = v.split(".")
-            # Se a última parte tiver 3 dígitos, tratar como milhar
-            if len(partes[-1]) == 3:
-                v = v.replace(".", "")
-
-    try:
-        return float(v)
-    except Exception:
-        return 0.0
-
+        return float(v.replace(".", "").replace(",", "."))
+    if "," in v:
+        return float(v.replace(",", "."))
+    return float(v)
 
 # ======================================================
-# CARREGAR E PREPARAR EXCEL
+# 🔥 CARREGAR PLANILHA E FILTRAR APENAS PEDIDOS VÁLIDOS
 # ======================================================
 def carregar():
     df = pd.read_excel(CAMINHO_EXCEL)
-
-    # Normaliza nomes de colunas
     df.columns = df.columns.str.upper().str.strip()
 
-    obrig = ["DATA", "VALOR COM IPI", "KG", "TOTAL M2"]
-    for c in obrig:
-        if c not in df.columns:
-            raise Exception(f"❌ Coluna obrigatória não encontrada no Excel: {c}")
+    # limpar colunas numéricas
+    for col in ["VALOR TOTAL", "VALOR PRODUTO", "VALOR EMBALAGEM", "VALOR COM IPI", "KG", "TOTAL M2"]:
+        if col in df.columns:
+            df[col] = df[col].apply(limpar_numero)
 
-    # Converte DATA
+    # datas
     df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
-    df = df[df["DATA"].notna()].copy()
+    df = df[df["DATA"].notna()]
 
-    # Limpa números principais
-    for c in ["VALOR COM IPI", "KG", "TOTAL M2"]:
-        df[c] = df[c].apply(limpar_numero)
-
-    # Filtra apenas TIPO DE PEDIDO = "NORMAL" se existir essa coluna
-    if "TIPO DE PEDIDO" in df.columns:
-        df["TIPO DE PEDIDO"] = df["TIPO DE PEDIDO"].astype(str).str.upper().str.strip()
-        df = df[df["TIPO DE PEDIDO"] == "NORMAL"].copy()
+    # ======================================================
+    # 🔥 REGRA DEFINITIVA PARA CONTAR PEDIDOS REAIS
+    # Somente valores entre 30.000 e 50.000 são pedidos válidos
+    # ======================================================
+    df["PEDIDO_NUM"] = df["PEDIDO"].apply(lambda x: limpar_numero(x))
+    df = df[(df["PEDIDO_NUM"] >= 30000) & (df["PEDIDO_NUM"] <= 50000)]
 
     return df
 
-
 # ======================================================
-# CÁLCULO DE PERÍODOS (MESMO DIA PARA AMBOS OS ANOS)
+# 🔥 PERÍODO ATUAL E ANO ANTERIOR (COM MESMAS REGRAS)
 # ======================================================
-def obter_regras_periodo(df: pd.DataFrame):
-    """
-    Regra:
-    - Ano atual: 1º dia do mês até última data real com pedido.
-    - Ano anterior: 1º dia do mesmo mês até MESMO dia do mês,
-      limitado ao último dia do mês no ano anterior.
-    """
+def obter_periodos(df):
     ultima_data = df["DATA"].max()
-    ano_atual = int(ultima_data.year)
-    mes_atual = int(ultima_data.month)
-    dia_limite = int(ultima_data.day)
 
-    # Início exibição ano atual = 01/mes/ano_atual
-    inicio_atual = date(ano_atual, mes_atual, 1)
+    # primeira data REAL do mês atual
+    primeira_atual = df[df["DATA"].dt.month == ultima_data.month]["DATA"].min()
 
-    # Fim real ano atual = última data com pedido
-    fim_atual = ultima_data.date()
+    # período atual sempre do PRIMEIRO DIA DO MÊS → até última data real
+    inicio_atual = ultima_data.replace(day=1)
 
-    # Ano anterior
-    ano_anterior = ano_atual - 1
-    # Último dia do mês no ano anterior (para não estourar em fev/29, etc.)
-    ultimo_dia_mes_ant = calendar.monthrange(ano_anterior, mes_atual)[1]
-    dia_limite_ant = min(dia_limite, ultimo_dia_mes_ant)
+    # ano anterior
+    ano_ant = ultima_data.year - 1
+    inicio_ant = inicio_atual.replace(year=ano_ant)
 
-    inicio_anterior = date(ano_anterior, mes_atual, 1)
-    fim_anterior = date(ano_anterior, mes_atual, dia_limite_ant)
+    # pegar última data real do ano anterior
+    df_ant_mes = df[(df["DATA"].dt.month == ultima_data.month) &
+                    (df["DATA"].dt.year == ano_ant)]
 
-    return {
-        "ano_atual": ano_atual,
-        "mes_atual": mes_atual,
-        "dia_limite": dia_limite,
-        "inicio_atual": inicio_atual,
-        "fim_atual": fim_atual,
-        "ano_anterior": ano_anterior,
-        "inicio_anterior": inicio_anterior,
-        "fim_anterior": fim_anterior,
-    }
+    if len(df_ant_mes) > 0:
+        fim_ant = df_ant_mes["DATA"].max()
+    else:
+        fim_ant = inicio_ant  # fallback
 
+    return (inicio_atual, ultima_data), (inicio_ant, fim_ant)
 
 # ======================================================
-# RESUMO DE UM PERÍODO
+# 🔥 RESUMO PARA QUALQUER PERÍODO
 # ======================================================
-def resumo_periodo(df: pd.DataFrame, ano: int, mes: int, dt_ini: date, dt_fim: date):
-    mask = (
-        (df["DATA"].dt.year == ano)
-        & (df["DATA"].dt.month == mes)
-        & (df["DATA"].dt.date >= dt_ini)
-        & (df["DATA"].dt.date <= dt_fim)
-    )
+def resumo(df, inicio, fim):
+    d = df[(df["DATA"] >= inicio) & (df["DATA"] <= fim)]
 
-    d = df[mask].copy()
+    total_valor = d["VALOR COM IPI"].sum()
+    total_kg = d["KG"].sum()
+    total_m2 = d["TOTAL M2"].sum()
+    pedidos = len(d)
+    ticket = total_valor / pedidos if pedidos else 0
 
-    fat = float(d["VALOR COM IPI"].sum())
-    kg = float(d["KG"].sum())
-    m2 = float(d["TOTAL M2"].sum())
-    pedidos = int(len(d))
-
-    ticket = fat / pedidos if pedidos > 0 else 0.0
+    preco_kg = total_valor / total_kg if total_kg else 0
+    preco_m2 = total_valor / total_m2 if total_m2 else 0
 
     return {
         "pedidos": pedidos,
-        "fat": fat,
-        "kg": kg,
-        "m2": m2,
+        "fat": total_valor,
+        "kg": total_kg,
+        "m2": total_m2,
         "ticket": ticket,
+        "preco_kg": preco_kg,
+        "preco_m2": preco_m2,
+        "inicio": inicio.strftime("%d/%m/%Y"),
+        "fim": fim.strftime("%d/%m/%Y")
     }
-
 
 # ======================================================
-# CALCULA TODOS OS KPIs
-# ======================================================
-def calcular_kpis(df: pd.DataFrame):
-    regras = obter_regras_periodo(df)
-
-    ano_atual = regras["ano_atual"]
-    mes_atual = regras["mes_atual"]
-    inicio_atual = regras["inicio_atual"]
-    fim_atual = regras["fim_atual"]
-    ano_anterior = regras["ano_anterior"]
-    inicio_anterior = regras["inicio_anterior"]
-    fim_anterior = regras["fim_anterior"]
-
-    # Resumos
-    atual = resumo_periodo(df, ano_atual, mes_atual, inicio_atual, fim_atual)
-    anterior = resumo_periodo(df, ano_anterior, mes_atual, inicio_anterior, fim_anterior)
-
-    # Variações (evita divisão por zero)
-    def variacao(p_atual, p_ant):
-        if p_ant == 0:
-            return 0.0
-        return (p_atual / p_ant - 1.0) * 100.0
-
-    fat_var = variacao(atual["fat"], anterior["fat"])
-    kg_var = variacao(atual["kg"], anterior["kg"])
-    qtd_var = variacao(atual["pedidos"], anterior["pedidos"])
-    ticket_var = variacao(atual["ticket"], anterior["ticket"])
-
-    # Datas para exibição no site
-    data_atual_str = fim_atual.strftime("%d/%m/%Y")
-    data_ano_anterior_str = fim_anterior.strftime("%d/%m/%Y")
-    inicio_mes_atual_str = inicio_atual.strftime("%d/%m/%Y")
-    inicio_mes_anterior_str = inicio_anterior.strftime("%d/%m/%Y")
-
-    # Monta estruturas finais
-    kpi_fat = {
-        "atual": round(atual["fat"], 2),
-        "ano_anterior": round(anterior["fat"], 2),
-        "variacao": fat_var,
-        "inicio_mes": inicio_mes_atual_str,
-        "data_atual": data_atual_str,
-        "inicio_mes_anterior": inicio_mes_anterior_str,
-        "data_ano_anterior": data_ano_anterior_str,
-    }
-
-    kpi_qtd = {
-        "atual": atual["pedidos"],
-        "ano_anterior": anterior["pedidos"],
-        "variacao": qtd_var,
-    }
-
-    kpi_kg = {
-        "atual": round(atual["kg"], 2),
-        "ano_anterior": round(anterior["kg"], 2),
-        "variacao": kg_var,
-    }
-
-    kpi_ticket = {
-        "atual": round(atual["ticket"], 2),
-        "ano_anterior": round(anterior["ticket"], 2),
-        "variacao": ticket_var,
-    }
-
-    return {
-        "fat": kpi_fat,
-        "qtd": kpi_qtd,
-        "kg": kpi_kg,
-        "ticket": kpi_ticket,
-        "regras": regras,
-    }
-
-
-# ======================================================
-# SALVAR JSON EM /dados E /site/dados
+# SALVAR JSON
 # ======================================================
 def salvar(nome, dados):
-    # pasta raiz
     with open(f"dados/{nome}", "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
-
-    # pasta usada pelo site
     with open(f"site/dados/{nome}", "w", encoding="utf-8") as f:
         json.dump(dados, f, ensure_ascii=False, indent=2)
 
-
 # ======================================================
-# MAIN
+# EXECUÇÃO PRINCIPAL
 # ======================================================
 if __name__ == "__main__":
-    print("=====================================")
-    print("Atualizando painel a partir do Excel")
-    print("=====================================")
-
     df = carregar()
-    kpis = calcular_kpis(df)
-    regras = kpis["regras"]
+    (inicio_atual, fim_atual), (inicio_ant, fim_ant) = obter_periodos(df)
 
-    # Debug no console (PowerShell)
+    atual = resumo(df, inicio_atual, fim_atual)
+    anterior = resumo(df, inicio_ant, fim_ant)
+
+    # FATURAMENTO JSON
+    salvar("kpi_faturamento.json", {
+        "atual": atual["fat"],
+        "ano_anterior": anterior["fat"],
+        "variacao": ((atual["fat"]/anterior["fat"])-1)*100 if anterior["fat"] else 0,
+        "inicio_mes": inicio_atual.strftime("%d/%m/%Y"),
+        "data_atual": fim_atual.strftime("%d/%m/%Y"),
+        "inicio_mes_anterior": inicio_ant.strftime("%d/%m/%Y"),
+        "data_ano_anterior": fim_ant.strftime("%d/%m/%Y")
+    })
+
+    salvar("kpi_quantidade_pedidos.json", {
+        "atual": atual["pedidos"],
+        "ano_anterior": anterior["pedidos"],
+        "variacao": ((atual["pedidos"]/anterior["pedidos"])-1)*100 if anterior["pedidos"] else 0
+    })
+
+    salvar("kpi_kg_total.json", {
+        "atual": atual["kg"],
+        "ano_anterior": anterior["kg"],
+        "variacao": ((atual["kg"]/anterior["kg"])-1)*100 if anterior["kg"] else 0
+    })
+
+    salvar("kpi_ticket_medio.json", {
+        "atual": atual["ticket"],
+        "ano_anterior": anterior["ticket"],
+        "variacao": ((atual["ticket"]/anterior["ticket"])-1)*100 if anterior["ticket"] else 0
+    })
+
+    salvar("kpi_preco_medio.json", {
+        "preco_medio_kg": round(atual["preco_kg"], 2),
+        "preco_medio_m2": round(atual["preco_m2"], 2),
+        "total_kg": round(atual["kg"], 2),
+        "total_m2": round(atual["m2"], 2),
+        "data": fim_atual.strftime("%d/%m/%Y")
+    })
+
     print("=====================================")
-    print(
-        f"Período ATUAL     : {regras['inicio_atual'].strftime('%d/%m/%Y')} → "
-        f"{regras['fim_atual'].strftime('%d/%m/%Y')}"
-    )
-    print(
-        f"Período ANTERIOR  : {regras['inicio_anterior'].strftime('%d/%m/%Y')} → "
-        f"{regras['fim_anterior'].strftime('%d/%m/%Y')}"
-    )
-    print(f"Pedidos atuais    : {kpis['qtd']['atual']}")
-    print(f"Pedidos ano ant.  : {kpis['qtd']['ano_anterior']}")
+    print("Atualização concluída com sucesso!")
     print("=====================================")
-
-    # Salva JSONs para o site
-    salvar("kpi_faturamento.json", kpis["fat"])
-    salvar("kpi_quantidade_pedidos.json", kpis["qtd"])
-    salvar("kpi_kg_total.json", kpis["kg"])
-    salvar("kpi_ticket_medio.json", kpis["ticket"])
-
-    print("✓ JSON gerados corretamente!")
