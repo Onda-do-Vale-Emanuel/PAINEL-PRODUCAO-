@@ -6,7 +6,7 @@ from datetime import datetime
 CAMINHO_EXCEL = "excel/PEDIDOS ONDA.xlsx"
 
 # ======================================================
-# 🔥 FUNÇÃO DEFINITIVA PARA LER NÚMEROS BRASILEIROS + DATAS CORROMPIDAS
+# 🔥 FUNÇÃO PARA LIMPAR NÚMEROS + DATAS CORROMPIDAS
 # ======================================================
 def limpar_numero(v):
     if pd.isna(v):
@@ -14,110 +14,100 @@ def limpar_numero(v):
 
     v_str = str(v).strip()
 
-    # Se vier uma DATA no campo numérico → converter para número real
-    # (exemplo: 1900-10-29 01:12:00 → usa dia*mes*hora = valor aproximado)
-    try:
-        # detectar formatação yyyy-mm-dd hh:mm:ss
-        if re.match(r"^\d{4}-\d{2}-\d{2}", v_str):
+    # Detectar datas acidentais no formato ISO (1900 etc)
+    if re.match(r"^\d{4}-\d{2}-\d{2}", v_str):
+        try:
             dt = pd.to_datetime(v_str, errors="coerce")
             if not pd.isna(dt):
-                return round((dt.day * 10) + (dt.hour / 10), 2)
-    except:
-        pass
+                # Converter data para número aproximado (ex.: 29/10/1900 → 2910)
+                return float(f"{dt.day}{dt.month}")
+        except:
+            pass
 
-    # Limpar caracteres
+    # Limpar caracteres estranhos
     v_clean = re.sub(r"[^0-9,.-]", "", v_str)
 
     if v_clean in ["", "-", ",", ".", ",-", ".-"]:
         return 0.0
 
-    # número tipo 9.999,99 → BR
+    # Número 9.999,99 → BR
     if "." in v_clean and "," in v_clean:
         return float(v_clean.replace(".", "").replace(",", "."))
 
-    # número tipo 999,99
+    # Número 999,99
     if "," in v_clean:
         return float(v_clean.replace(",", "."))
 
-    # número normal
     return float(v_clean)
 
+
 # ======================================================
-# 🔥 CARREGAR PLANILHA + TRATAR PEDIDOS VÁLIDOS
+# 🔥 CARREGAMENTO DO EXCEL
 # ======================================================
 def carregar():
     df = pd.read_excel(CAMINHO_EXCEL)
     df.columns = df.columns.str.upper().str.strip()
 
     # limpar colunas numéricas
-    for col in ["VALOR TOTAL", "VALOR PRODUTO", "VALOR EMBALAGEM",
-                "VALOR COM IPI", "KG", "TOTAL M2"]:
+    COLUNAS = ["VALOR TOTAL", "VALOR PRODUTO", "VALOR EMBALAGEM",
+               "VALOR COM IPI", "KG", "TOTAL M2"]
+
+    for col in COLUNAS:
         if col in df.columns:
             df[col] = df[col].apply(limpar_numero)
 
-    # tratar datas
     df["DATA"] = pd.to_datetime(df["DATA"], errors="coerce")
     df = df[df["DATA"].notna()]
 
-    # tratar campo PEDIDO (tudo entre 30000 e 50000 é válido)
     df["PEDIDO_NUM"] = df["PEDIDO"].apply(limpar_numero)
     df = df[(df["PEDIDO_NUM"] >= 30000) & (df["PEDIDO_NUM"] <= 50000)]
 
     return df
 
+
 # ======================================================
-# 🔥 PERÍODOS CORRETOS (ATUAL E ANTERIOR)
+# 🔥 REGRAS DE PERÍODO ATUAL E ANTERIOR
 # ======================================================
 def obter_periodos(df):
-    ultima_data = df["DATA"].max()
+    ultima = df["DATA"].max()
+    mes = ultima.month
 
-    ano_atual = ultima_data.year
-    mes_atual = ultima_data.month
-    dia_atual = ultima_data.day
+    inicio_atual = ultima.replace(day=1)
+    fim_atual = ultima
 
-    # Período atual sempre 01 → última data real
-    inicio_atual = ultima_data.replace(day=1)
-    fim_atual = ultima_data
+    ano_ant = ultima.year - 1
+    inicio_ant = inicio_atual.replace(year=ano_ant)
+    fim_alvo_ant = ultima.replace(year=ano_ant)
 
-    # Ano anterior
-    ano_anterior = ano_atual - 1
-    inicio_ant = inicio_atual.replace(year=ano_anterior)
-    fim_alvo_ant = ultima_data.replace(year=ano_anterior)
-
-    df_ant = df[
-        (df["DATA"].dt.year == ano_anterior) &
-        (df["DATA"].dt.month == mes_atual)
-    ]
+    df_ant = df[(df["DATA"].dt.year == ano_ant) & (df["DATA"].dt.month == mes)]
 
     if df_ant.empty:
         fim_ant = fim_alvo_ant
     else:
-        df_ant_ate_dia = df_ant[df_ant["DATA"] <= fim_alvo_ant]
-        if not df_ant_ate_dia.empty:
-            fim_ant = df_ant_ate_dia["DATA"].max()
-        else:
-            fim_ant = df_ant["DATA"].max()
+        df_ant_filtrado = df_ant[df_ant["DATA"] <= fim_alvo_ant]
+        fim_ant = df_ant_filtrado["DATA"].max() if not df_ant_filtrado.empty else df_ant["DATA"].max()
 
     return (inicio_atual, fim_atual), (inicio_ant, fim_ant)
 
+
 # ======================================================
-# 🔥 RESUMO DO PERÍODO
+# 🔥 RESUMO GENERICO DO PERÍODO
 # ======================================================
 def resumo(df, inicio, fim):
     d = df[(df["DATA"] >= inicio) & (df["DATA"] <= fim)]
 
-    total_valor = d["VALOR COM IPI"].sum()
+    total_fat = d["VALOR COM IPI"].sum()
     total_kg = d["KG"].sum()
     total_m2 = d["TOTAL M2"].sum()
-    total_ped = len(d)
+    pedidos = len(d)
 
-    ticket = total_valor / total_ped if total_ped else 0
-    preco_kg = total_valor / total_kg if total_kg else 0
-    preco_m2 = total_valor / total_m2 if total_m2 else 0
+    ticket = total_fat / pedidos if pedidos else 0
+    preco_kg = total_fat / total_kg if total_kg else 0
+    preco_m2 = total_fat / total_m2 if total_m2 else 0
 
     return {
-        "pedidos": total_ped,
-        "fat": total_valor,
+        "pedidos": pedidos,
+        "fat": total_fat,
         "kg": total_kg,
         "m2": total_m2,
         "ticket": ticket,
@@ -127,27 +117,27 @@ def resumo(df, inicio, fim):
         "fim": fim.strftime("%d/%m/%Y")
     }
 
+
 # ======================================================
-# 🔥 SALVAR JSON DUPLO (dados/ e site/dados/)
+# 🔥 SALVAR EM DUAS PASTAS
 # ======================================================
 def salvar(nome, dados):
-    with open(f"dados/{nome}", "w", encoding="utf-8") as f:
-        json.dump(dados, f, ensure_ascii=False, indent=2)
+    for caminho in [f"dados/{nome}", f"site/dados/{nome}"]:
+        with open(caminho, "w", encoding="utf-8") as f:
+            json.dump(dados, f, ensure_ascii=False, indent=2)
 
-    with open(f"site/dados/{nome}", "w", encoding="utf-8") as f:
-        json.dump(dados, f, ensure_ascii=False, indent=2)
 
 # ======================================================
-# 🔥 EXECUÇÃO PRINCIPAL
+# 🔥 EXECUÇÃO
 # ======================================================
 if __name__ == "__main__":
     df = carregar()
-    (inicio_atual, fim_atual), (inicio_ant, fim_ant) = obter_periodos(df)
+    (ini_at, fim_at), (ini_ant, fim_ant) = obter_periodos(df)
 
-    atual = resumo(df, inicio_atual, fim_atual)
-    anterior = resumo(df, inicio_ant, fim_ant)
+    atual = resumo(df, ini_at, fim_at)
+    anterior = resumo(df, ini_ant, fim_ant)
 
-    # ------------------ FATURAMENTO ------------------
+    # FATURAMENTO
     salvar("kpi_faturamento.json", {
         "atual": atual["fat"],
         "ano_anterior": anterior["fat"],
@@ -158,28 +148,28 @@ if __name__ == "__main__":
         "data_ano_anterior": anterior["fim"]
     })
 
-    # ------------------ QUANTIDADE ------------------
+    # QUANTIDADE
     salvar("kpi_quantidade_pedidos.json", {
         "atual": atual["pedidos"],
         "ano_anterior": anterior["pedidos"],
         "variacao": ((atual["pedidos"]/anterior["pedidos"]) - 1) * 100 if anterior["pedidos"] else 0
     })
 
-    # ------------------ KG TOTAL ------------------
+    # KG TOTAL (SEM CASAS)
     salvar("kpi_kg_total.json", {
-        "atual": round(atual["kg"], 0),   # sem casas decimais
+        "atual": round(atual["kg"], 0),
         "ano_anterior": round(anterior["kg"], 0),
         "variacao": ((atual["kg"]/anterior["kg"]) - 1) * 100 if anterior["kg"] else 0
     })
 
-    # ------------------ TICKET MÉDIO ------------------
+    # TICKET
     salvar("kpi_ticket_medio.json", {
         "atual": atual["ticket"],
         "ano_anterior": anterior["ticket"],
         "variacao": ((atual["ticket"]/anterior["ticket"]) - 1) * 100 if anterior["ticket"] else 0
     })
 
-    # ------------------ PREÇO MÉDIO ------------------
+    # PREÇO MÉDIO + ANTERIOR
     salvar("kpi_preco_medio.json", {
         "atual": {
             "preco_medio_kg": round(atual["preco_kg"], 2),
@@ -193,6 +183,6 @@ if __name__ == "__main__":
         }
     })
 
-    print("=====================================")
+    print("\n=====================================")
     print(" ATUALIZAÇÃO CONCLUÍDA COM SUCESSO!")
-    print("=====================================")
+    print("=====================================\n")
