@@ -1,0 +1,390 @@
+﻿==================== ESTRUTURA COMPLETA DO PROJETO ====================
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\dados
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 01/30/2026 09:44:32
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\excel
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 02/17/2026 10:40:34
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\imagens
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 01/30/2026 09:01:08
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 02/12/2026 16:42:05
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 01/30/2026 08:58:21
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\9-2 -ESTRUTURA_PROJETO.txt
+TIPO          : ARQUIVO
+TAMANHO       : 10497 bytes
+MODIFICADO EM : 02/09/2026 12:09:41
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\ATUALIZAR_PAINEL.bat
+TIPO          : ARQUIVO
+TAMANHO       : 334 bytes
+MODIFICADO EM : 02/12/2026 16:10:48
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\ATUALIZAR_PAINEL.ps1
+TIPO          : ARQUIVO
+TAMANHO       : 432 bytes
+MODIFICADO EM : 01/27/2026 16:48:52
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\estrutura.txt
+TIPO          : ARQUIVO
+TAMANHO       : 1518 bytes
+MODIFICADO EM : 01/29/2026 14:25:22
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\estrutura_completa.txt
+TIPO          : ARQUIVO
+TAMANHO       : 1138 bytes
+MODIFICADO EM : 02/17/2026 14:09:18
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\estrutura_projeto_atualizada.txt
+TIPO          : ARQUIVO
+TAMANHO       : 564130 bytes
+MODIFICADO EM : 02/12/2026 13:45:22
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\index.html
+TIPO          : ARQUIVO
+TAMANHO       : 5362 bytes
+MODIFICADO EM : 02/13/2026 11:49:57
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\kpis.js
+TIPO          : ARQUIVO
+TAMANHO       : 5945 bytes
+MODIFICADO EM : 02/13/2026 10:40:04
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\slider.js
+TIPO          : ARQUIVO
+TAMANHO       : 448 bytes
+MODIFICADO EM : 01/30/2026 10:50:08
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\style.css
+TIPO          : ARQUIVO
+TAMANHO       : 2876 bytes
+MODIFICADO EM : 02/12/2026 07:29:42
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_faturamento.json
+TIPO          : ARQUIVO
+TAMANHO       : 240 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_kg_total.json
+TIPO          : ARQUIVO
+TAMANHO       : 82 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_preco_medio.json
+TIPO          : ARQUIVO
+TAMANHO       : 220 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_quantidade_pedidos.json
+TIPO          : ARQUIVO
+TAMANHO       : 77 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_ticket_medio.json
+TIPO          : ARQUIVO
+TAMANHO       : 110 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\excel\PEDIDOS ONDA.xlsx
+TIPO          : ARQUIVO
+TAMANHO       : 324083 bytes
+MODIFICADO EM : 02/05/2026 16:58:38
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\excel\PEDIDOS_2025.xlsx
+TIPO          : ARQUIVO
+TAMANHO       : 305130 bytes
+MODIFICADO EM : 02/17/2026 09:26:56
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\excel\PEDIDOS_2026.xlsx
+TIPO          : ARQUIVO
+TAMANHO       : 108277 bytes
+MODIFICADO EM : 02/17/2026 09:26:50
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\imagens\slide3.png
+TIPO          : ARQUIVO
+TAMANHO       : 410263 bytes
+MODIFICADO EM : 01/27/2026 15:46:52
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\__pycache__
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 02/12/2026 14:18:34
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\atualizar_dashboard.py
+TIPO          : ARQUIVO
+TAMANHO       : 503 bytes
+MODIFICADO EM : 01/28/2026 14:39:08
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\atualizar_kpis.py
+TIPO          : ARQUIVO
+TAMANHO       : 3834 bytes
+MODIFICADO EM : 01/27/2026 15:24:32
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\atualizar_kpi_quantidade_pedidos.py
+TIPO          : ARQUIVO
+TAMANHO       : 435 bytes
+MODIFICADO EM : 01/28/2026 14:39:24
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\atualizar_kpi_ticket_medio.py
+TIPO          : ARQUIVO
+TAMANHO       : 444 bytes
+MODIFICADO EM : 01/28/2026 14:39:34
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\atualizar_painel_completo.py
+TIPO          : ARQUIVO
+TAMANHO       : 4385 bytes
+MODIFICADO EM : 02/13/2026 11:33:45
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\atualizar_preco_medio.py
+TIPO          : ARQUIVO
+TAMANHO       : 3492 bytes
+MODIFICADO EM : 02/12/2026 14:43:34
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\debug_2026.py
+TIPO          : ARQUIVO
+TAMANHO       : 1327 bytes
+MODIFICADO EM : 02/12/2026 16:55:18
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\verificar_precos.py
+TIPO          : ARQUIVO
+TAMANHO       : 1764 bytes
+MODIFICADO EM : 02/03/2026 14:53:13
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\verificar_site_vs_planilha.py
+TIPO          : ARQUIVO
+TAMANHO       : 2286 bytes
+MODIFICADO EM : 02/10/2026 09:48:36
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\ver_colunas.py
+TIPO          : ARQUIVO
+TAMANHO       : 98 bytes
+MODIFICADO EM : 01/28/2026 10:53:54
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\python\__pycache__\atualizar_painel_completo.cpython-310.pyc
+TIPO          : ARQUIVO
+TAMANHO       : 3257 bytes
+MODIFICADO EM : 02/12/2026 14:18:34
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados
+TIPO          : PASTA
+TAMANHO       : -
+MODIFICADO EM : 01/30/2026 09:44:32
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_faturamento.json
+TIPO          : ARQUIVO
+TAMANHO       : 240 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_kg_total.json
+TIPO          : ARQUIVO
+TAMANHO       : 82 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_preco_medio.json
+TIPO          : ARQUIVO
+TAMANHO       : 220 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_quantidade_pedidos.json
+TIPO          : ARQUIVO
+TAMANHO       : 77 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+CAMINHO       : D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_ticket_medio.json
+TIPO          : ARQUIVO
+TAMANHO       : 110 bytes
+MODIFICADO EM : 02/17/2026 10:21:10
+---------------------------------------------------------------------
+
+
+==================== CONTEÚDO DOS JSON (DADOS) ====================
+
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_faturamento.json =====
+{
+  "atual": 597360.67,
+  "ano_anterior": 602596.1499999999,
+  "variacao": -0.8688206852964231,
+  "inicio_mes": "01/02/2026",
+  "data_atual": "17/02/2026",
+  "inicio_mes_anterior": "01/02/2025",
+  "data_ano_anterior": "17/02/2025"
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_kg_total.json =====
+{
+  "atual": 46907,
+  "ano_anterior": 44216,
+  "variacao": 6.086032205536451
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_preco_medio.json =====
+{
+  "atual": {
+    "preco_medio_kg": 12.73,
+    "preco_medio_m2": 5.75,
+    "data": "17/02/2026"
+  },
+  "ano_anterior": {
+    "preco_medio_kg": 13.63,
+    "preco_medio_m2": 6.71,
+    "data": "17/02/2025"
+  }
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_quantidade_pedidos.json =====
+{
+  "atual": 52,
+  "ano_anterior": 51,
+  "variacao": 1.9607843137254832
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\dados\kpi_ticket_medio.json =====
+{
+  "atual": 11487.705192307692,
+  "ano_anterior": 11815.610784313723,
+  "variacao": -2.7751895182714925
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_faturamento.json =====
+{
+  "atual": 597360.67,
+  "ano_anterior": 602596.1499999999,
+  "variacao": -0.8688206852964231,
+  "inicio_mes": "01/02/2026",
+  "data_atual": "17/02/2026",
+  "inicio_mes_anterior": "01/02/2025",
+  "data_ano_anterior": "17/02/2025"
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_kg_total.json =====
+{
+  "atual": 46907,
+  "ano_anterior": 44216,
+  "variacao": 6.086032205536451
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_preco_medio.json =====
+{
+  "atual": {
+    "preco_medio_kg": 12.73,
+    "preco_medio_m2": 5.75,
+    "data": "17/02/2026"
+  },
+  "ano_anterior": {
+    "preco_medio_kg": 13.63,
+    "preco_medio_m2": 6.71,
+    "data": "17/02/2025"
+  }
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_quantidade_pedidos.json =====
+{
+  "atual": 52,
+  "ano_anterior": 51,
+  "variacao": 1.9607843137254832
+}
+
+===== D:\USUARIOS\ADM05\Documents\dashboard_tv\site\dados\kpi_ticket_medio.json =====
+{
+  "atual": 11487.705192307692,
+  "ano_anterior": 11815.610784313723,
+  "variacao": -2.7751895182714925
+}
