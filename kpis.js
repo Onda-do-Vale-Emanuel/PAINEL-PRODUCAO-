@@ -2,8 +2,12 @@
 // PAINEL INFORMATIVO PRODUÇÃO - KPIs
 // ======================================================
 
-function formatarNumeroKg(valor) {
-  const numero = Math.round(Number(valor || 0));
+// Se no futuro o backend já mandar o valor certo, basta trocar para 1
+const FATOR_ESCALA = 0.1; // divide por 10 (55.800 -> 5.580)
+
+function formatarNumeroKg(valorBruto) {
+  const bruto = Number(valorBruto || 0);
+  const numero = bruto * FATOR_ESCALA; // corrige escala
 
   return numero.toLocaleString("pt-BR", {
     minimumFractionDigits: 0,
@@ -48,6 +52,9 @@ fetch("dados/kpi_peso_dia.json")
 
     document.getElementById("diaAcabVar").innerHTML =
       formatarVariacao(data.acabamento.variacao);
+  })
+  .catch(err => {
+    console.error("Erro ao carregar kpi_peso_dia.json:", err);
   });
 
 
@@ -81,4 +88,7 @@ fetch("dados/kpi_acumulado_mes.json")
 
     document.getElementById("mesAcabVar").innerHTML =
       formatarVariacao(data.acabamento.variacao);
+  })
+  .catch(err => {
+    console.error("Erro ao carregar kpi_acumulado_mes.json:", err);
   });
