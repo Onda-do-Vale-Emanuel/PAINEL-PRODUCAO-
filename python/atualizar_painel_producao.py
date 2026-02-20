@@ -1,12 +1,13 @@
 import pandas as pd
 import json
-import re
 import sys
 from datetime import datetime
 from pathlib import Path
 
 # ============================================================
-#  PAINEL INFORMATIVO PRODUÇÃO - VERSÃO CORRIGIDA DATA
+#  PAINEL INFORMATIVO PRODUÇÃO - VERSÃO DEFINITIVA CORRIGIDA
+#  - Sem distorção de número
+#  - Usa valor real da planilha
 # ============================================================
 
 def descobrir_base_dir() -> Path:
@@ -35,31 +36,47 @@ GRUPO_IMPRESSORAS = [3, 2, 4]
 GRUPO_ACABAMENTO = [11, 9, 8, 7, 20, 10, 15]
 
 
+# ============================================================
+# FUNÇÕES
+# ============================================================
+
 def normalizar_colunas(df):
     df.columns = [str(c).strip().upper() for c in df.columns]
     return df
 
 
 def limpar_numero(v):
+    """
+    NÃO altera milhar.
+    Apenas converte para float se já for número.
+    """
     if pd.isna(v):
         return 0.0
     try:
-        return float(str(v).replace(".", "").replace(",", "."))
+        return float(v)
     except:
         return 0.0
 
 
 def carregar_planilha(caminho):
+    if not caminho.exists():
+        raise FileNotFoundError(f"Arquivo não encontrado: {caminho}")
+
     df = pd.read_excel(caminho)
     df = normalizar_colunas(df)
 
+    # Data correta (Coluna A - Data Referência)
     df["DATA REFERÊNCIA"] = pd.to_datetime(
         df["DATA REFERÊNCIA"], errors="coerce", dayfirst=True
     )
 
+    # Máquina
     df["MAQ"] = pd.to_numeric(df["MAQ"], errors="coerce")
+
+    # KG produzido (sem distorcer número)
     df["KG PROD"] = df["KG PROD"].apply(limpar_numero)
 
+    # Filtrar apenas máquinas desejadas
     df = df[df["MAQ"].isin(GRUPO_IMPRESSORAS + GRUPO_ACABAMENTO)]
 
     df = df.rename(
@@ -88,7 +105,7 @@ def resumo_por_dia(df, data):
     imp = d[d["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
     acab = d[d["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
 
-    return round(imp, 2), round(acab, 2)
+    return round(imp, 0), round(acab, 0)
 
 
 def resumo_acumulado_mes(df, data):
@@ -102,7 +119,7 @@ def resumo_acumulado_mes(df, data):
     imp = d[d["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
     acab = d[d["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
 
-    return round(imp, 2), round(acab, 2)
+    return round(imp, 0), round(acab, 0)
 
 
 def variacao(atual, anterior):
@@ -111,6 +128,10 @@ def variacao(atual, anterior):
     return round(((atual / anterior) - 1) * 100, 2)
 
 
+# ============================================================
+# MAIN
+# ============================================================
+
 def main():
     df26 = carregar_planilha(EXCEL_2026)
     df25 = carregar_planilha(EXCEL_2025)
@@ -118,7 +139,7 @@ def main():
     ultima_data = df26["DATA"].max()
     data_ant = ultima_data.replace(year=ultima_data.year - 1)
 
-    # PESO DO DIA
+    # ===== PESO DO DIA =====
     imp26, acab26 = resumo_por_dia(df26, ultima_data)
     imp25, acab25 = resumo_por_dia(df25, data_ant)
 
@@ -140,7 +161,7 @@ def main():
         },
     )
 
-    # ACUMULADO
+    # ===== ACUMULADO DO MÊS =====
     imp26m, acab26m = resumo_acumulado_mes(df26, ultima_data)
     imp25m, acab25m = resumo_acumulado_mes(df25, data_ant)
 
@@ -163,9 +184,9 @@ def main():
     )
 
     print("\n=====================================")
-    print("PAINEL PRODUÇÃO ATUALIZADO COM SUCESSO")
+    print("PAINEL PRODUÇÃO ATUALIZADO CORRETAMENTE")
     print("=====================================")
-    print("Data dia:", ultima_data.strftime("%d/%m/%Y"))
+    print("Data:", ultima_data.strftime("%d/%m/%Y"))
     print("=====================================\n")
 
 
