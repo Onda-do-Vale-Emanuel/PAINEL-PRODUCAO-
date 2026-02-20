@@ -3,4 +3,12 @@
   "data_anterior": "19/02/2025",
   "impressoras": {
     "atual": 5580.0,
-    "ano_anterior": 
+    "ano_anterior": 4038.0,
+    "variacao": 38.19
+  },
+  "acabamento": {
+    "atual": 5024.0,
+    "ano_anterior": 3695.0,
+    "variacao": 35.97
+  }
+}
