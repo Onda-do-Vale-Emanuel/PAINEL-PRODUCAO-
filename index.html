@@ -2,163 +2,87 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Painel Comercial</title>
+  <title>Painel Informativo Produção</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- SLIDE 1 -->
+  <!-- SLIDE 1 - PESO DO DIA -->
   <div class="slide active">
     <div class="slide-header">
-      <h1>PAINEL COMERCIAL</h1>
-      <h2>Faturamento com IPI</h2>
+      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+      <h2>Peso do Dia</h2>
     </div>
 
     <div class="slide-content">
+
       <div class="kpi-row">
         <div class="kpi-card kpi-main">
-          <div class="kpi-label">Total de pedidos</div>
-          <div class="kpi-number" id="fatQtdAtual">--</div>
-          <div class="kpi-value" id="fatValorAtual">--</div>
-          <div class="kpi-sub" id="fatDataAtual">--</div>
+          <div class="kpi-label">IMPRESSORAS</div>
+          <div class="kpi-value" id="diaImpAtual">--</div>
+          <div class="kpi-sub" id="diaDataAtual">--</div>
+          <div class="kpi-sub">Ano anterior: <span id="diaImpAnterior">--</span></div>
+          <div class="kpi-var" id="diaImpVar">--</div>
         </div>
 
-        <div class="kpi-card kpi-secondary">
-          <div class="kpi-label">Ano anterior</div>
-          <div class="kpi-number" id="fatQtdAnterior">--</div>
-          <div class="kpi-value" id="fatValorAnterior">--</div>
-          <div class="kpi-sub" id="fatDataAnterior">--</div>
+        <div class="kpi-card kpi-main">
+          <div class="kpi-label">ACABAMENTO</div>
+          <div class="kpi-value" id="diaAcabAtual">--</div>
+          <div class="kpi-sub">Ano anterior: <span id="diaAcabAnterior">--</span></div>
+          <div class="kpi-var" id="diaAcabVar">--</div>
         </div>
       </div>
 
-      <div class="kpi-row">
-        <div class="kpi-card kpi-variacao">
-          <div class="kpi-var" id="fatVariacao">--</div>
-        </div>
-      </div>
-
-      <div class="kpi-row">
-        <div class="kpi-card kpi-meta">
-          <div id="fatMetaValor">Meta mês: --</div>
-          <div id="fatMetaPerc">🎯 -- % da meta</div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- SLIDE 2 -->
+  <!-- SLIDE 2 - ACUMULADO DO MÊS -->
   <div class="slide">
     <div class="slide-header">
-      <h1>PAINEL COMERCIAL</h1>
-      <h2>KG Total</h2>
+      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+      <h2>Acumulado do Mês</h2>
     </div>
 
     <div class="slide-content">
+
       <div class="kpi-row">
         <div class="kpi-card kpi-main">
-          <div class="kpi-label">Total de pedidos</div>
-          <div class="kpi-number" id="kgQtdAtual">--</div>
-          <div class="kpi-value" id="kgValorAtual">--</div>
-          <div class="kpi-sub" id="kgDataAtual">--</div>
+          <div class="kpi-label">IMPRESSORAS</div>
+          <div class="kpi-value" id="mesImpAtual">--</div>
+          <div class="kpi-sub" id="mesPeriodoAtual">--</div>
+          <div class="kpi-sub">Ano anterior: <span id="mesImpAnterior">--</span></div>
+          <div class="kpi-var" id="mesImpVar">--</div>
         </div>
 
-        <div class="kpi-card kpi-secondary">
-          <div class="kpi-label">Ano anterior</div>
-          <div class="kpi-number" id="kgQtdAnterior">--</div>
-          <div class="kpi-value" id="kgValorAnterior">--</div>
-          <div class="kpi-sub" id="kgDataAnterior">--</div>
+        <div class="kpi-card kpi-main">
+          <div class="kpi-label">ACABAMENTO</div>
+          <div class="kpi-value" id="mesAcabAtual">--</div>
+          <div class="kpi-sub">Ano anterior: <span id="mesAcabAnterior">--</span></div>
+          <div class="kpi-var" id="mesAcabVar">--</div>
         </div>
       </div>
 
-      <div class="kpi-row">
-        <div class="kpi-card kpi-variacao">
-          <div class="kpi-var" id="kgVariacao">--</div>
-        </div>
-      </div>
-
-      <div class="kpi-row">
-        <div class="kpi-card kpi-meta">
-          <div id="kgMetaValor">Meta mês: --</div>
-          <div id="kgMetaPerc">🎯 -- % da meta</div>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- SLIDE 3 -->
+  <!-- SLIDE 3 - FRASE DO DIA -->
   <div class="slide">
     <div class="slide-header">
-      <h1>PAINEL COMERCIAL</h1>
-      <h2>Ticket Médio</h2>
+      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+      <h2>Mensagem do Dia</h2>
     </div>
 
-    <div class="slide-content">
-      <div class="kpi-row">
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">Ticket médio atual</div>
-          <div class="kpi-value" id="ticketAtual">--</div>
-          <div class="kpi-sub" id="ticketQtdAtual">--</div>
-        </div>
-
-        <div class="kpi-card kpi-secondary">
-          <div class="kpi-label">Ticket médio ano anterior</div>
-          <div class="kpi-value" id="ticketAnterior">--</div>
-          <div class="kpi-sub" id="ticketQtdAnterior">--</div>
-        </div>
-      </div>
-
-      <div class="kpi-row">
-        <div class="kpi-card kpi-variacao">
-          <div class="kpi-var" id="ticketVariacao">--</div>
-        </div>
+    <div class="slide-content" style="text-align:center;">
+      <div style="font-size: 36px; font-weight: bold; padding: 40px;" id="fraseTexto">
+        --
       </div>
     </div>
   </div>
 
-  <!-- SLIDE 4 -->
-  <div class="slide">
-    <div class="slide-header">
-      <h1>PAINEL COMERCIAL</h1>
-      <h2>Preço Médio</h2>
-    </div>
-
-    <div class="slide-content">
-      <!-- LINHA 1 (ATUAL) -->
-      <div class="kpi-row">
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">Preço Médio KG (Atual)</div>
-          <div class="kpi-value" id="precoMedioKG">--</div>
-          <div class="kpi-sub" id="precoDataKG">--</div>
-        </div>
-
-        <div class="kpi-card kpi-secondary">
-          <div class="kpi-label">Preço Médio m² (Atual)</div>
-          <div class="kpi-value" id="precoMedioM2">--</div>
-          <div class="kpi-sub" id="precoDataM2">--</div>
-        </div>
-      </div>
-
-      <!-- LINHA 2 (ANO ANTERIOR) -->
-      <div class="kpi-row">
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">Preço Médio KG (Ano anterior)</div>
-          <div class="kpi-value" id="precoMedioKGant">--</div>
-          <div class="kpi-sub" id="precoDataKGant">--</div>
-        </div>
-
-        <div class="kpi-card kpi-secondary">
-          <div class="kpi-label">Preço Médio m² (Ano anterior)</div>
-          <div class="kpi-value" id="precoMedioM2ant">--</div>
-          <div class="kpi-sub" id="precoDataM2ant">--</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SLIDE 5 (IMAGEM) -->
+  <!-- SLIDE 4 - IMAGEM -->
   <div class="slide slide-img-content">
     <div class="slide-header">
-      <h1>PAINEL COMERCIAL</h1>
+      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
       <h2>Resumo</h2>
     </div>
 
@@ -167,7 +91,9 @@
     </div>
   </div>
 
-<script src="slider.js?v=5"></script>
-<script src="kpis.js?v=15"></script>
+<script src="slider.js"></script>
+<script src="kpis.js"></script>
+<script src="frases.js"></script>
+
 </body>
 </html>
