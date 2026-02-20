@@ -1,71 +1,74 @@
-function formatarKg(valor) {
-  return Math.round(Number(valor || 0)).toLocaleString("pt-BR") + " Kg";
+function formatarKg(v){
+  return Math.round(Number(v||0)).toLocaleString("pt-BR")+" Kg";
 }
 
-function formatarPercent(valor) {
-  return valor.toFixed(2).replace(".", ",") + " %";
+function formatarPercent(v){
+  return v.toFixed(2).replace(".",",")+" %";
 }
 
-function variacaoHTML(valor) {
-  const classe = valor >= 0 ? "positivo" : "negativo";
-  const seta = valor >= 0 ? "▲" : "▼";
-  return `<span class="${classe}">${seta} ${Math.abs(valor).toFixed(2)}%</span>`;
+function variacaoHTML(v){
+  const classe=v>=0?"positivo":"negativo";
+  const seta=v>=0?"▲":"▼";
+  return `<span class="${classe}">${seta} ${Math.abs(v).toFixed(2)}%</span>`;
 }
 
 /* DIA */
 fetch("dados/kpi_peso_dia.json")
-.then(r => r.json())
-.then(data => {
+.then(r=>r.json())
+.then(d=>{
+  document.getElementById("diaImpAtual").innerText=formatarKg(d.impressoras.atual);
+  document.getElementById("diaImpAnterior").innerText=formatarKg(d.impressoras.ano_anterior);
+  document.getElementById("diaImpVar").innerHTML=variacaoHTML(d.impressoras.variacao);
+  document.getElementById("diaDataAtual").innerText="Data: "+d.data_atual;
 
-  document.getElementById("diaImpAtual").innerText = formatarKg(data.impressoras.atual);
-  document.getElementById("diaImpAnterior").innerText = formatarKg(data.impressoras.ano_anterior);
-  document.getElementById("diaImpVar").innerHTML = variacaoHTML(data.impressoras.variacao);
-
-  document.getElementById("diaAcabAtual").innerText = formatarKg(data.acabamento.atual);
-  document.getElementById("diaAcabAnterior").innerText = formatarKg(data.acabamento.ano_anterior);
-  document.getElementById("diaAcabVar").innerHTML = variacaoHTML(data.acabamento.variacao);
-
+  document.getElementById("diaAcabAtual").innerText=formatarKg(d.acabamento.atual);
+  document.getElementById("diaAcabAnterior").innerText=formatarKg(d.acabamento.ano_anterior);
+  document.getElementById("diaAcabVar").innerHTML=variacaoHTML(d.acabamento.variacao);
+  document.getElementById("diaDataAtual2").innerText="Data: "+d.data_atual;
 });
 
 /* ACUMULADO */
 fetch("dados/kpi_acumulado_mes.json")
-.then(r => r.json())
-.then(data => {
+.then(r=>r.json())
+.then(d=>{
+  document.getElementById("mesImpAtual").innerText=formatarKg(d.impressoras.atual);
+  document.getElementById("mesImpAnterior").innerText=formatarKg(d.impressoras.ano_anterior);
+  document.getElementById("mesImpVar").innerHTML=variacaoHTML(d.impressoras.variacao);
+  document.getElementById("mesPeriodoAtual").innerText="Período: "+d.periodo_atual;
 
-  document.getElementById("mesImpAtual").innerText = formatarKg(data.impressoras.atual);
-  document.getElementById("mesAcabAtual").innerText = formatarKg(data.acabamento.atual);
-
+  document.getElementById("mesAcabAtual").innerText=formatarKg(d.acabamento.atual);
+  document.getElementById("mesAcabAnterior").innerText=formatarKg(d.acabamento.ano_anterior);
+  document.getElementById("mesAcabVar").innerHTML=variacaoHTML(d.acabamento.variacao);
+  document.getElementById("mesPeriodoAtual2").innerText="Período: "+d.periodo_atual;
 });
 
 /* META */
 fetch("dados/kpi_meta_mes.json")
-.then(r => r.json())
-.then(data => {
-
-  document.getElementById("metaImpValor").innerText = formatarKg(data.impressoras.meta);
-  document.getElementById("metaImpPercent").innerText = formatarPercent(data.impressoras.percentual);
-  document.getElementById("metaImpFalta").innerText =
-      data.impressoras.falta > 0 ? "Falta: " + formatarKg(data.impressoras.falta) : "";
-
-  document.getElementById("barraImp").style.width =
-      Math.min(data.impressoras.percentual,100) + "%";
-
-  if (data.impressoras.percentual >= 100) {
-      document.getElementById("metaImpStatus").innerHTML =
-        "🎉 Parabéns! Meta Atingida! 🎆";
+.then(r=>r.json())
+.then(d=>{
+  document.getElementById("metaImpValor").innerText=formatarKg(d.impressoras.meta);
+  document.getElementById("metaImpPercent").innerText=formatarPercent(d.impressoras.percentual);
+  document.getElementById("metaImpFalta").innerText=d.impressoras.falta>0?"Falta: "+formatarKg(d.impressoras.falta):"";
+  document.getElementById("barraImp").style.width=Math.min(d.impressoras.percentual,100)+"%";
+  if(d.impressoras.percentual>=100){
+    document.getElementById("metaImpStatus").innerHTML="🎉 Parabéns! Meta Atingida! 🎆";
   }
 
-  document.getElementById("metaAcabValor").innerText = formatarKg(data.acabamento.meta);
-  document.getElementById("metaAcabPercent").innerText = formatarPercent(data.acabamento.percentual);
-  document.getElementById("metaAcabFalta").innerText =
-      data.acabamento.falta > 0 ? "Falta: " + formatarKg(data.acabamento.falta) : "";
-
-  document.getElementById("barraAcab").style.width =
-      Math.min(data.acabamento.percentual,100) + "%";
-
-  if (data.acabamento.percentual >= 100) {
-      document.getElementById("metaAcabStatus").innerHTML =
-        "🎉 Parabéns! Meta Atingida! 🎆";
+  document.getElementById("metaAcabValor").innerText=formatarKg(d.acabamento.meta);
+  document.getElementById("metaAcabPercent").innerText=formatarPercent(d.acabamento.percentual);
+  document.getElementById("metaAcabFalta").innerText=d.acabamento.falta>0?"Falta: "+formatarKg(d.acabamento.falta):"";
+  document.getElementById("barraAcab").style.width=Math.min(d.acabamento.percentual,100)+"%";
+  if(d.acabamento.percentual>=100){
+    document.getElementById("metaAcabStatus").innerHTML="🎉 Parabéns! Meta Atingida! 🎆";
   }
-
 });
+
+/* FRASES (SIMPLIFICADO) */
+const frases=[
+"Talento ganha jogos, mas trabalho em equipe ganha campeonatos.",
+"O sucesso nasce da disciplina diária.",
+"Cada meta atingida fortalece o time."
+];
+
+const dia=new Date().getDate();
+document.getElementById("fraseTexto").innerText=frases[dia%frases.length];

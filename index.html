@@ -11,16 +11,15 @@
     PAINEL INFORMATIVO PRODUÇÃO
 </div>
 
-<!-- SLIDE 1 -->
+<!-- SLIDE 1 - DIA -->
 <div class="slide active">
-
     <div class="subtitle">Peso do Dia</div>
 
     <div class="kpi-row">
-
         <div class="kpi-card">
             <div class="kpi-label">IMPRESSORAS</div>
             <div class="kpi-number" id="diaImpAtual"></div>
+            <div class="kpi-sub" id="diaDataAtual"></div>
             <div class="kpi-sub">Ano anterior: <span id="diaImpAnterior"></span></div>
             <div class="kpi-var" id="diaImpVar"></div>
         </div>
@@ -28,72 +27,73 @@
         <div class="kpi-card">
             <div class="kpi-label">ACABAMENTO</div>
             <div class="kpi-number" id="diaAcabAtual"></div>
+            <div class="kpi-sub" id="diaDataAtual2"></div>
             <div class="kpi-sub">Ano anterior: <span id="diaAcabAnterior"></span></div>
             <div class="kpi-var" id="diaAcabVar"></div>
         </div>
-
     </div>
 </div>
 
-
-<!-- SLIDE 2 -->
+<!-- SLIDE 2 - ACUMULADO -->
 <div class="slide">
-
     <div class="subtitle">Acumulado do Mês</div>
 
     <div class="kpi-row">
-
         <div class="kpi-card">
             <div class="kpi-label">IMPRESSORAS</div>
             <div class="kpi-number" id="mesImpAtual"></div>
+            <div class="kpi-sub" id="mesPeriodoAtual"></div>
+            <div class="kpi-sub">Ano anterior: <span id="mesImpAnterior"></span></div>
+            <div class="kpi-var" id="mesImpVar"></div>
         </div>
 
         <div class="kpi-card">
             <div class="kpi-label">ACABAMENTO</div>
             <div class="kpi-number" id="mesAcabAtual"></div>
+            <div class="kpi-sub" id="mesPeriodoAtual2"></div>
+            <div class="kpi-sub">Ano anterior: <span id="mesAcabAnterior"></span></div>
+            <div class="kpi-var" id="mesAcabVar"></div>
         </div>
-
     </div>
 </div>
 
-
-<!-- SLIDE 3 -->
+<!-- SLIDE 3 - META -->
 <div class="slide">
-
     <div class="subtitle">Meta do Mês</div>
 
     <div class="kpi-row">
-
         <div class="kpi-card">
-
             <div class="kpi-label">IMPRESSORAS</div>
             <div class="kpi-sub">Meta: <span id="metaImpValor"></span></div>
-
-            <div class="barra-meta">
-                <div class="barra-meta-fill" id="barraImp"></div>
-            </div>
-
+            <div class="barra-meta"><div class="barra-meta-fill" id="barraImp"></div></div>
             <div class="kpi-number" id="metaImpPercent"></div>
             <div class="kpi-sub" id="metaImpFalta"></div>
             <div class="kpi-var" id="metaImpStatus"></div>
-
         </div>
 
         <div class="kpi-card">
-
             <div class="kpi-label">ACABAMENTO</div>
             <div class="kpi-sub">Meta: <span id="metaAcabValor"></span></div>
-
-            <div class="barra-meta">
-                <div class="barra-meta-fill" id="barraAcab"></div>
-            </div>
-
+            <div class="barra-meta"><div class="barra-meta-fill" id="barraAcab"></div></div>
             <div class="kpi-number" id="metaAcabPercent"></div>
             <div class="kpi-sub" id="metaAcabFalta"></div>
             <div class="kpi-var" id="metaAcabStatus"></div>
-
         </div>
+    </div>
+</div>
 
+<!-- SLIDE 4 - FRASES -->
+<div class="slide">
+    <div class="subtitle">Mensagem do Dia</div>
+    <div class="kpi-card" style="margin:auto; width:60%;">
+        <div id="fraseTexto" style="font-size:24px;"></div>
+    </div>
+</div>
+
+<!-- SLIDE 5 - IMAGEM FINAL -->
+<div class="slide">
+    <div style="text-align:center; margin-top:80px;">
+        <img src="imagens/logo.png" style="max-width:500px;">
     </div>
 </div>
 
