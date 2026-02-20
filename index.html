@@ -7,18 +7,20 @@
 </head>
 <body>
 
-<!-- SLIDE 1 - PESO DO DIA -->
+<div class="top-bar">
+    PAINEL INFORMATIVO PRODUÇÃO
+</div>
+
+<!-- SLIDE 1 -->
 <div class="slide active">
-    <div class="slide-header">
-        <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-        <h2>Peso do Dia</h2>
-    </div>
+
+    <div class="subtitle">Peso do Dia</div>
 
     <div class="kpi-row">
+
         <div class="kpi-card">
             <div class="kpi-label">IMPRESSORAS</div>
             <div class="kpi-number" id="diaImpAtual"></div>
-            <div class="kpi-sub" id="diaDataAtual"></div>
             <div class="kpi-sub">Ano anterior: <span id="diaImpAnterior"></span></div>
             <div class="kpi-var" id="diaImpVar"></div>
         </div>
@@ -29,43 +31,41 @@
             <div class="kpi-sub">Ano anterior: <span id="diaAcabAnterior"></span></div>
             <div class="kpi-var" id="diaAcabVar"></div>
         </div>
+
     </div>
 </div>
 
 
-<!-- SLIDE 2 - ACUMULADO -->
+<!-- SLIDE 2 -->
 <div class="slide">
-    <div class="slide-header">
-        <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-        <h2>Acumulado do Mês</h2>
-    </div>
+
+    <div class="subtitle">Acumulado do Mês</div>
 
     <div class="kpi-row">
+
         <div class="kpi-card">
             <div class="kpi-label">IMPRESSORAS</div>
             <div class="kpi-number" id="mesImpAtual"></div>
-            <div class="kpi-sub" id="mesPeriodoAtual"></div>
         </div>
 
         <div class="kpi-card">
             <div class="kpi-label">ACABAMENTO</div>
             <div class="kpi-number" id="mesAcabAtual"></div>
-            <div class="kpi-sub" id="mesPeriodoAtual2"></div>
         </div>
+
     </div>
 </div>
 
 
-<!-- SLIDE 3 - META -->
+<!-- SLIDE 3 -->
 <div class="slide">
-    <div class="slide-header">
-        <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-        <h2>Meta do Mês</h2>
-    </div>
+
+    <div class="subtitle">Meta do Mês</div>
 
     <div class="kpi-row">
 
         <div class="kpi-card">
+
             <div class="kpi-label">IMPRESSORAS</div>
             <div class="kpi-sub">Meta: <span id="metaImpValor"></span></div>
 
@@ -76,9 +76,11 @@
             <div class="kpi-number" id="metaImpPercent"></div>
             <div class="kpi-sub" id="metaImpFalta"></div>
             <div class="kpi-var" id="metaImpStatus"></div>
+
         </div>
 
         <div class="kpi-card">
+
             <div class="kpi-label">ACABAMENTO</div>
             <div class="kpi-sub">Meta: <span id="metaAcabValor"></span></div>
 
@@ -89,11 +91,11 @@
             <div class="kpi-number" id="metaAcabPercent"></div>
             <div class="kpi-sub" id="metaAcabFalta"></div>
             <div class="kpi-var" id="metaAcabStatus"></div>
+
         </div>
 
     </div>
 </div>
-
 
 <script src="kpis.js"></script>
 <script src="slider.js"></script>
