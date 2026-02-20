@@ -1,101 +1,101 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Painel Informativo Produção</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Painel Informativo Produção</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="top-bar">
-    PAINEL INFORMATIVO PRODUÇÃO
-</div>
+<header class="topo">
+  <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+  <div class="faixa"></div>
+</header>
 
-<!-- SLIDE 1 -->
-<div class="slide active">
-    <div class="subtitle">Peso do Dia</div>
-    <div class="kpi-row">
-        <div class="kpi-card">
-            <div class="kpi-label">IMPRESSORAS</div>
-            <div class="kpi-number" id="diaImpAtual"></div>
-            <div class="kpi-sub" id="diaDataAtual"></div>
-            <div class="kpi-sub">Ano anterior: <span id="diaImpAnterior"></span></div>
-            <div class="kpi-var" id="diaImpVar"></div>
-        </div>
+<!-- SLIDE DIA -->
+<section class="slide">
+  <h2>Peso do Dia</h2>
 
-        <div class="kpi-card">
-            <div class="kpi-label">ACABAMENTO</div>
-            <div class="kpi-number" id="diaAcabAtual"></div>
-            <div class="kpi-sub" id="diaDataAtual2"></div>
-            <div class="kpi-sub">Ano anterior: <span id="diaAcabAnterior"></span></div>
-            <div class="kpi-var" id="diaAcabVar"></div>
-        </div>
+  <div class="cards">
+    <div class="card">
+      <h3>IMPRESSORAS</h3>
+      <div id="diaImpAtual" class="valor"></div>
+      <div id="diaDataAtual" class="periodo"></div>
+      <div> Ano anterior: <span id="diaImpAnterior"></span></div>
+      <div id="diaImpVar"></div>
     </div>
-</div>
 
-<!-- SLIDE 2 -->
-<div class="slide">
-    <div class="subtitle">Acumulado do Mês</div>
-    <div class="kpi-row">
-        <div class="kpi-card">
-            <div class="kpi-label">IMPRESSORAS</div>
-            <div class="kpi-number" id="mesImpAtual"></div>
-            <div class="kpi-sub" id="mesPeriodoAtual"></div>
-            <div class="kpi-sub">Ano anterior: <span id="mesImpAnterior"></span></div>
-            <div class="kpi-var" id="mesImpVar"></div>
-        </div>
-
-        <div class="kpi-card">
-            <div class="kpi-label">ACABAMENTO</div>
-            <div class="kpi-number" id="mesAcabAtual"></div>
-            <div class="kpi-sub" id="mesPeriodoAtual2"></div>
-            <div class="kpi-sub">Ano anterior: <span id="mesAcabAnterior"></span></div>
-            <div class="kpi-var" id="mesAcabVar"></div>
-        </div>
+    <div class="card">
+      <h3>ACABAMENTO</h3>
+      <div id="diaAcabAtual" class="valor"></div>
+      <div id="diaDataAtual2" class="periodo"></div>
+      <div> Ano anterior: <span id="diaAcabAnterior"></span></div>
+      <div id="diaAcabVar"></div>
     </div>
-</div>
+  </div>
+</section>
 
-<!-- SLIDE 3 -->
-<div class="slide">
-    <div class="subtitle">Meta do Mês</div>
-    <div class="kpi-row">
-        <div class="kpi-card">
-            <div class="kpi-label">IMPRESSORAS</div>
-            <div class="kpi-sub">Meta: <span id="metaImpValor"></span></div>
-            <div class="barra-meta"><div class="barra-meta-fill" id="barraImp"></div></div>
-            <div class="kpi-number" id="metaImpPercent"></div>
-            <div class="kpi-sub" id="metaImpFalta"></div>
-            <div class="kpi-var" id="metaImpStatus"></div>
-        </div>
+<!-- SLIDE ACUMULADO -->
+<section class="slide">
+  <h2>Acumulado do Mês</h2>
 
-        <div class="kpi-card">
-            <div class="kpi-label">ACABAMENTO</div>
-            <div class="kpi-sub">Meta: <span id="metaAcabValor"></span></div>
-            <div class="barra-meta"><div class="barra-meta-fill" id="barraAcab"></div></div>
-            <div class="kpi-number" id="metaAcabPercent"></div>
-            <div class="kpi-sub" id="metaAcabFalta"></div>
-            <div class="kpi-var" id="metaAcabStatus"></div>
-        </div>
+  <div class="cards">
+    <div class="card">
+      <h3>IMPRESSORAS</h3>
+      <div id="mesImpAtual" class="valor"></div>
+      <div id="mesPeriodoAtual" class="periodo"></div>
+      <div> Ano anterior: <span id="mesImpAnterior"></span></div>
+      <div id="mesImpVar"></div>
     </div>
-</div>
 
-<!-- SLIDE 4 -->
-<div class="slide">
-    <div class="subtitle">Mensagem do Dia</div>
-    <div class="kpi-card" style="margin:auto; width:60%;">
-        <div id="fraseTexto" style="font-size:28px;"></div>
+    <div class="card">
+      <h3>ACABAMENTO</h3>
+      <div id="mesAcabAtual" class="valor"></div>
+      <div id="mesPeriodoAtual2" class="periodo"></div>
+      <div> Ano anterior: <span id="mesAcabAnterior"></span></div>
+      <div id="mesAcabVar"></div>
     </div>
-</div>
+  </div>
+</section>
 
-<!-- SLIDE 5 - IMAGEM -->
-<div class="slide">
-    <div style="text-align:center; margin-top:80px;">
-        <img src="imagens/logo.png" style="max-width:600px;">
+<!-- SLIDE META -->
+<section class="slide">
+  <h2>Meta do Mês</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h3>IMPRESSORAS</h3>
+      <div id="metaImpValor"></div>
+      <div class="barraContainer"><div id="barraImp" class="barra"></div></div>
+      <div id="metaImpPercent"></div>
+      <div id="metaImpFalta"></div>
+      <div id="metaImpStatus"></div>
     </div>
-</div>
+
+    <div class="card">
+      <h3>ACABAMENTO</h3>
+      <div id="metaAcabValor"></div>
+      <div class="barraContainer"><div id="barraAcab" class="barra"></div></div>
+      <div id="metaAcabPercent"></div>
+      <div id="metaAcabFalta"></div>
+      <div id="metaAcabStatus"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE FRASES -->
+<section class="slide">
+  <h2>Mensagem do Dia</h2>
+
+  <div class="cardFrase">
+      <p id="fraseTexto" class="fraseTexto"></p>
+      <p id="fraseAutor" class="fraseAutor"></p>
+      <p id="fraseSignificado" class="fraseSignificado"></p>
+  </div>
+</section>
 
 <script src="kpis.js"></script>
-<script src="slider.js"></script>
 
 </body>
 </html>

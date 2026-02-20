@@ -64,7 +64,7 @@ fetch("dados/kpi_meta_mes.json")
   }
 });
 
-/* ================= FRASES (AGORA JSON) ================= */
+/* ================= FRASES ================= */
 fetch("dados/frases.json")
 .then(r=>r.json())
 .then(lista=>{
