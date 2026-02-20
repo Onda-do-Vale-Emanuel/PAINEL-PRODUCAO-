@@ -75,3 +75,14 @@ fetch("dados/frases.json")
   document.getElementById("fraseAutor").innerText = "- " + frase.autor;
   document.getElementById("fraseSignificado").innerText = "O que significa: " + frase.significado;
 });
+/* ================= FRASES ================= */
+fetch("dados/frases.json")
+.then(r=>r.json())
+.then(lista=>{
+  const hoje = new Date().getDate();
+  const frase = lista[(hoje-1) % lista.length];
+
+  document.getElementById("fraseTexto").innerText = `"${frase.frase}"`;
+  document.getElementById("fraseAutor").innerText = "- " + frase.autor;
+  document.getElementById("fraseSignificado").innerText = "O que significa: " + frase.significado;
+});
