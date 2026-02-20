@@ -3,11 +3,11 @@
 // ======================================================
 
 function formatarNumeroKg(valor) {
-  const numero = Number(valor || 0);
+  const numero = Math.round(Number(valor || 0));
 
   return numero.toLocaleString("pt-BR", {
-    minimumFractionDigits: 3,
-    maximumFractionDigits: 3
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }) + " Kg";
 }
 
