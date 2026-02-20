@@ -3,16 +3,17 @@ function formatarKg(v){
 }
 
 function formatarPercent(v){
-  return v.toFixed(2).replace(".",",")+" %";
+  return Number(v||0).toFixed(2).replace(".",",")+" %";
 }
 
 function variacaoHTML(v){
+  if(isNaN(v)) return "";
   const classe=v>=0?"positivo":"negativo";
   const seta=v>=0?"▲":"▼";
   return `<span class="${classe}">${seta} ${Math.abs(v).toFixed(2)}%</span>`;
 }
 
-/* DIA */
+/* ================= DIA ================= */
 fetch("dados/kpi_peso_dia.json")
 .then(r=>r.json())
 .then(d=>{
@@ -27,7 +28,7 @@ fetch("dados/kpi_peso_dia.json")
   document.getElementById("diaDataAtual2").innerText="Data: "+d.data_atual;
 });
 
-/* ACUMULADO */
+/* ================= ACUMULADO ================= */
 fetch("dados/kpi_acumulado_mes.json")
 .then(r=>r.json())
 .then(d=>{
@@ -42,7 +43,7 @@ fetch("dados/kpi_acumulado_mes.json")
   document.getElementById("mesPeriodoAtual2").innerText="Período: "+d.periodo_atual;
 });
 
-/* META */
+/* ================= META ================= */
 fetch("dados/kpi_meta_mes.json")
 .then(r=>r.json())
 .then(d=>{
@@ -63,12 +64,14 @@ fetch("dados/kpi_meta_mes.json")
   }
 });
 
-/* FRASES (SIMPLIFICADO) */
-const frases=[
-"Talento ganha jogos, mas trabalho em equipe ganha campeonatos.",
-"O sucesso nasce da disciplina diária.",
-"Cada meta atingida fortalece o time."
-];
+/* ================= FRASES (AGORA JSON) ================= */
+fetch("dados/frases.json")
+.then(r=>r.json())
+.then(lista=>{
+  const hoje = new Date().getDate();
+  const frase = lista[(hoje-1) % lista.length];
 
-const dia=new Date().getDate();
-document.getElementById("fraseTexto").innerText=frases[dia%frases.length];
+  document.getElementById("fraseTexto").innerText = `"${frase.frase}"`;
+  document.getElementById("fraseAutor").innerText = "- " + frase.autor;
+  document.getElementById("fraseSignificado").innerText = "O que significa: " + frase.significado;
+});

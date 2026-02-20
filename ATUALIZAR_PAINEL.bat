@@ -1,32 +1,34 @@
 @echo off
-cd /d %~dp0
 
-python python\seguranca_execucao.py
+cd /d "%~dp0"
 
-IF %ERRORLEVEL% NEQ 0 (
+echo ==========================================
+echo     ATUALIZANDO PAINEL PRODUCAO
+echo ==========================================
+echo.
+
+REM Executa o EXE
+if exist "PAINEL_PRODUCAO.exe" (
+    PAINEL_PRODUCAO.exe
+) else (
+    echo ERRO: PAINEL_PRODUCAO.exe nao encontrado!
     pause
-    exit /b
+    exit
 )
 
-echo =====================================
-echo ATUALIZANDO PAINEL COMERCIAL
-echo =====================================
 echo.
+echo Enviando dados para o GitHub...
 
-python python\atualizar_painel_completo.py
+git add dados\*.json
+git add site\dados\*.json
 
-echo.
-echo =====================================
-echo ENVIANDO PARA O GITHUB
-echo =====================================
-echo.
-
-git add .
-git commit -m "Atualização automática painel"
+git commit -m "Atualizacao automatica painel producao"
 git push
 
 echo.
-echo =====================================
-echo PAINEL ATUALIZADO COM SUCESSO
-echo =====================================
+echo ==========================================
+echo     PAINEL ATUALIZADO COM SUCESSO
+echo ==========================================
+echo.
+
 pause

@@ -1,18 +1,27 @@
 import tkinter as tk
 from tkinter import messagebox
-from datetime import datetime
+import subprocess
 from seguranca_execucao_producao import *
 import atualizar_painel_producao
+
+
+def enviar_github():
+    try:
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", "Atualizacao automatica painel producao"], check=True)
+        subprocess.run(["git", "push"], check=True)
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 
 def iniciar_atualizacao():
     if precisa_senha():
         senha = entry_senha.get()
-
         resultado = validar_senha(senha)
 
         if resultado == True:
-            messagebox.showinfo("Autenticação", "Senha validada com sucesso.")
+            pass
         elif resultado == "bloqueado":
             messagebox.showerror("Bloqueado", "Entrar em contato com o desenvolvedor Emanuel")
             root.destroy()
@@ -21,11 +30,21 @@ def iniciar_atualizacao():
             messagebox.showerror("Erro", "Senha incorreta.")
             return
 
-    atualizar_painel_producao.main()
-    registrar_execucao()
+    try:
+        atualizar_painel_producao.main()
+        registrar_execucao()
 
-    messagebox.showinfo("Sucesso", "Painel atualizado com sucesso!")
-    root.destroy()
+        sucesso_git = enviar_github()
+
+        if sucesso_git:
+            messagebox.showinfo("Sucesso", "Painel atualizado e enviado ao GitHub com sucesso!")
+        else:
+            messagebox.showwarning("Atenção", "Atualizou os dados, mas houve erro ao enviar ao GitHub.")
+
+        root.destroy()
+
+    except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro:\n{str(e)}")
 
 
 root = tk.Tk()
@@ -41,10 +60,12 @@ if precisa_senha():
     entry_senha.pack(pady=10)
 else:
     entry_senha = tk.Entry(frame)
-    entry_senha.insert(0, "")
     entry_senha.pack_forget()
 
-tk.Button(root, text="Iniciar Atualização", bg="#f37021", fg="white",
-          font=("Arial", 12), command=iniciar_atualizacao).pack(pady=20)
+tk.Button(root, text="Iniciar Atualização",
+          bg="#f37021",
+          fg="white",
+          font=("Arial", 12),
+          command=iniciar_atualizacao).pack(pady=20)
 
 root.mainloop()
