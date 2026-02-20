@@ -1,99 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Painel Informativo Produção</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>Painel Informativo Produção</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- SLIDE 1 - PESO DO DIA -->
-  <div class="slide active">
+<!-- SLIDE 1 - PESO DO DIA -->
+<div class="slide active">
     <div class="slide-header">
-      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-      <h2>Peso do Dia</h2>
+        <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+        <h2>Peso do Dia</h2>
     </div>
 
-    <div class="slide-content">
-
-      <div class="kpi-row">
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">IMPRESSORAS</div>
-          <div class="kpi-value" id="diaImpAtual">--</div>
-          <div class="kpi-sub" id="diaDataAtual">--</div>
-          <div class="kpi-sub">Ano anterior: <span id="diaImpAnterior">--</span></div>
-          <div class="kpi-var" id="diaImpVar">--</div>
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-label">IMPRESSORAS</div>
+            <div class="kpi-number" id="diaImpAtual"></div>
+            <div class="kpi-sub" id="diaDataAtual"></div>
+            <div class="kpi-sub">Ano anterior: <span id="diaImpAnterior"></span></div>
+            <div class="kpi-var" id="diaImpVar"></div>
         </div>
 
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">ACABAMENTO</div>
-          <div class="kpi-value" id="diaAcabAtual">--</div>
-          <div class="kpi-sub">Ano anterior: <span id="diaAcabAnterior">--</span></div>
-          <div class="kpi-var" id="diaAcabVar">--</div>
+        <div class="kpi-card">
+            <div class="kpi-label">ACABAMENTO</div>
+            <div class="kpi-number" id="diaAcabAtual"></div>
+            <div class="kpi-sub">Ano anterior: <span id="diaAcabAnterior"></span></div>
+            <div class="kpi-var" id="diaAcabVar"></div>
         </div>
-      </div>
-
     </div>
-  </div>
+</div>
 
-  <!-- SLIDE 2 - ACUMULADO DO MÊS -->
-  <div class="slide">
+
+<!-- SLIDE 2 - ACUMULADO -->
+<div class="slide">
     <div class="slide-header">
-      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-      <h2>Acumulado do Mês</h2>
+        <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+        <h2>Acumulado do Mês</h2>
     </div>
 
-    <div class="slide-content">
-
-      <div class="kpi-row">
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">IMPRESSORAS</div>
-          <div class="kpi-value" id="mesImpAtual">--</div>
-          <div class="kpi-sub" id="mesPeriodoAtual">--</div>
-          <div class="kpi-sub">Ano anterior: <span id="mesImpAnterior">--</span></div>
-          <div class="kpi-var" id="mesImpVar">--</div>
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-label">IMPRESSORAS</div>
+            <div class="kpi-number" id="mesImpAtual"></div>
+            <div class="kpi-sub" id="mesPeriodoAtual"></div>
         </div>
 
-        <div class="kpi-card kpi-main">
-          <div class="kpi-label">ACABAMENTO</div>
-          <div class="kpi-value" id="mesAcabAtual">--</div>
-          <div class="kpi-sub">Ano anterior: <span id="mesAcabAnterior">--</span></div>
-          <div class="kpi-var" id="mesAcabVar">--</div>
+        <div class="kpi-card">
+            <div class="kpi-label">ACABAMENTO</div>
+            <div class="kpi-number" id="mesAcabAtual"></div>
+            <div class="kpi-sub" id="mesPeriodoAtual2"></div>
         </div>
-      </div>
-
     </div>
-  </div>
+</div>
 
-  <!-- SLIDE 3 - FRASE DO DIA -->
-  <div class="slide">
+
+<!-- SLIDE 3 - META -->
+<div class="slide">
     <div class="slide-header">
-      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-      <h2>Mensagem do Dia</h2>
+        <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
+        <h2>Meta do Mês</h2>
     </div>
 
-    <div class="slide-content" style="text-align:center;">
-      <div style="font-size: 36px; font-weight: bold; padding: 40px;" id="fraseTexto">
-        --
-      </div>
-    </div>
-  </div>
+    <div class="kpi-row">
 
-  <!-- SLIDE 4 - IMAGEM -->
-  <div class="slide slide-img-content">
-    <div class="slide-header">
-      <h1>PAINEL INFORMATIVO PRODUÇÃO</h1>
-      <h2>Resumo</h2>
-    </div>
+        <div class="kpi-card">
+            <div class="kpi-label">IMPRESSORAS</div>
+            <div class="kpi-sub">Meta: <span id="metaImpValor"></span></div>
 
-    <div class="slide-content slide-img-content">
-      <img class="img-institucional" src="imagens/slide3.png" alt="Slide institucional" />
-    </div>
-  </div>
+            <div class="barra-meta">
+                <div class="barra-meta-fill" id="barraImp"></div>
+            </div>
 
-<script src="slider.js"></script>
+            <div class="kpi-number" id="metaImpPercent"></div>
+            <div class="kpi-sub" id="metaImpFalta"></div>
+            <div class="kpi-var" id="metaImpStatus"></div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-label">ACABAMENTO</div>
+            <div class="kpi-sub">Meta: <span id="metaAcabValor"></span></div>
+
+            <div class="barra-meta">
+                <div class="barra-meta-fill" id="barraAcab"></div>
+            </div>
+
+            <div class="kpi-number" id="metaAcabPercent"></div>
+            <div class="kpi-sub" id="metaAcabFalta"></div>
+            <div class="kpi-var" id="metaAcabStatus"></div>
+        </div>
+
+    </div>
+</div>
+
+
 <script src="kpis.js"></script>
-<script src="frases.js"></script>
+<script src="slider.js"></script>
 
 </body>
 </html>

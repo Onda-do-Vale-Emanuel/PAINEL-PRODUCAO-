@@ -5,9 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 # ============================================================
-#  PAINEL INFORMATIVO PRODUÇÃO - VERSÃO DEFINITIVA CORRIGIDA
-#  - Sem distorção de número
-#  - Usa valor real da planilha
+# PAINEL PRODUÇÃO - META SEPARADA POR GRUPO
 # ============================================================
 
 def descobrir_base_dir() -> Path:
@@ -35,10 +33,23 @@ DADOS_DIR_2 = BASE_DIR / "site" / "dados"
 GRUPO_IMPRESSORAS = [3, 2, 4]
 GRUPO_ACABAMENTO = [11, 9, 8, 7, 20, 10, 15]
 
+# ===== METAS MENSAIS (IGUAIS PARA AMBOS, MAS APLICADAS SEPARADO) =====
 
-# ============================================================
-# FUNÇÕES
-# ============================================================
+METAS_MENSAIS = {
+    1: 100000,
+    2: 100000,
+    3: 120000,
+    4: 130000,
+    5: 130000,
+    6: 130000,
+    7: 150000,
+    8: 150000,
+    9: 150000,
+    10: 150000,
+    11: 150000,
+    12: 98000
+}
+
 
 def normalizar_colunas(df):
     df.columns = [str(c).strip().upper() for c in df.columns]
@@ -46,10 +57,6 @@ def normalizar_colunas(df):
 
 
 def limpar_numero(v):
-    """
-    NÃO altera milhar.
-    Apenas converte para float se já for número.
-    """
     if pd.isna(v):
         return 0.0
     try:
@@ -59,24 +66,16 @@ def limpar_numero(v):
 
 
 def carregar_planilha(caminho):
-    if not caminho.exists():
-        raise FileNotFoundError(f"Arquivo não encontrado: {caminho}")
-
     df = pd.read_excel(caminho)
     df = normalizar_colunas(df)
 
-    # Data correta (Coluna A - Data Referência)
     df["DATA REFERÊNCIA"] = pd.to_datetime(
         df["DATA REFERÊNCIA"], errors="coerce", dayfirst=True
     )
 
-    # Máquina
     df["MAQ"] = pd.to_numeric(df["MAQ"], errors="coerce")
-
-    # KG produzido (sem distorcer número)
     df["KG PROD"] = df["KG PROD"].apply(limpar_numero)
 
-    # Filtrar apenas máquinas desejadas
     df = df[df["MAQ"].isin(GRUPO_IMPRESSORAS + GRUPO_ACABAMENTO)]
 
     df = df.rename(
@@ -99,38 +98,11 @@ def salvar_json(nome, payload):
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
-def resumo_por_dia(df, data):
-    d = df[df["DATA"].dt.date == data.date()]
-
-    imp = d[d["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
-    acab = d[d["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
-
-    return round(imp, 0), round(acab, 0)
-
-
-def resumo_acumulado_mes(df, data):
-    inicio = data.replace(day=1)
-
-    d = df[
-        (df["DATA"].dt.date >= inicio.date())
-        & (df["DATA"].dt.date <= data.date())
-    ]
-
-    imp = d[d["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
-    acab = d[d["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
-
-    return round(imp, 0), round(acab, 0)
-
-
 def variacao(atual, anterior):
     if anterior == 0:
         return 0
     return round(((atual / anterior) - 1) * 100, 2)
 
-
-# ============================================================
-# MAIN
-# ============================================================
 
 def main():
     df26 = carregar_planilha(EXCEL_2026)
@@ -139,55 +111,71 @@ def main():
     ultima_data = df26["DATA"].max()
     data_ant = ultima_data.replace(year=ultima_data.year - 1)
 
-    # ===== PESO DO DIA =====
-    imp26, acab26 = resumo_por_dia(df26, ultima_data)
-    imp25, acab25 = resumo_por_dia(df25, data_ant)
+    mes_atual = ultima_data.month
+    meta_mes = METAS_MENSAIS.get(mes_atual, 0)
 
-    salvar_json(
-        "kpi_peso_dia.json",
-        {
-            "data_atual": ultima_data.strftime("%d/%m/%Y"),
-            "data_anterior": data_ant.strftime("%d/%m/%Y"),
-            "impressoras": {
-                "atual": imp26,
-                "ano_anterior": imp25,
-                "variacao": variacao(imp26, imp25),
-            },
-            "acabamento": {
-                "atual": acab26,
-                "ano_anterior": acab25,
-                "variacao": variacao(acab26, acab25),
-            },
+    # ================= DIA =================
+    dia26 = df26[df26["DATA"].dt.date == ultima_data.date()]
+    dia25 = df25[df25["DATA"].dt.date == data_ant.date()]
+
+    imp26 = dia26[dia26["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
+    imp25 = dia25[dia25["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
+
+    acab26 = dia26[dia26["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
+    acab25 = dia25[dia25["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
+
+    salvar_json("kpi_peso_dia.json", {
+        "data_atual": ultima_data.strftime("%d/%m/%Y"),
+        "data_anterior": data_ant.strftime("%d/%m/%Y"),
+        "impressoras": {
+            "atual": imp26,
+            "ano_anterior": imp25,
+            "variacao": variacao(imp26, imp25)
         },
-    )
+        "acabamento": {
+            "atual": acab26,
+            "ano_anterior": acab25,
+            "variacao": variacao(acab26, acab25)
+        }
+    })
 
-    # ===== ACUMULADO DO MÊS =====
-    imp26m, acab26m = resumo_acumulado_mes(df26, ultima_data)
-    imp25m, acab25m = resumo_acumulado_mes(df25, data_ant)
+    # ================= ACUMULADO =================
+    inicio_mes = ultima_data.replace(day=1)
 
-    salvar_json(
-        "kpi_acumulado_mes.json",
-        {
-            "periodo_atual": f"01/{ultima_data.strftime('%m/%Y')} até {ultima_data.strftime('%d/%m/%Y')}",
-            "periodo_anterior": f"01/{data_ant.strftime('%m/%Y')} até {data_ant.strftime('%d/%m/%Y')}",
-            "impressoras": {
-                "atual": imp26m,
-                "ano_anterior": imp25m,
-                "variacao": variacao(imp26m, imp25m),
-            },
-            "acabamento": {
-                "atual": acab26m,
-                "ano_anterior": acab25m,
-                "variacao": variacao(acab26m, acab25m),
-            },
+    mes26 = df26[(df26["DATA"] >= inicio_mes) & (df26["DATA"] <= ultima_data)]
+
+    imp26m = mes26[mes26["MAQ"].isin(GRUPO_IMPRESSORAS)]["KG_PROD"].sum()
+    acab26m = mes26[mes26["MAQ"].isin(GRUPO_ACABAMENTO)]["KG_PROD"].sum()
+
+    salvar_json("kpi_acumulado_mes.json", {
+        "periodo_atual": f"01/{ultima_data.strftime('%m/%Y')} até {ultima_data.strftime('%d/%m/%Y')}",
+        "impressoras": {
+            "atual": imp26m
         },
-    )
+        "acabamento": {
+            "atual": acab26m
+        }
+    })
 
-    print("\n=====================================")
-    print("PAINEL PRODUÇÃO ATUALIZADO CORRETAMENTE")
-    print("=====================================")
-    print("Data:", ultima_data.strftime("%d/%m/%Y"))
-    print("=====================================\n")
+    # ================= META SEPARADA =================
+    meta_json = {
+        "impressoras": {
+            "meta": meta_mes,
+            "producao": imp26m,
+            "percentual": round((imp26m / meta_mes) * 100, 2) if meta_mes else 0,
+            "falta": max(meta_mes - imp26m, 0)
+        },
+        "acabamento": {
+            "meta": meta_mes,
+            "producao": acab26m,
+            "percentual": round((acab26m / meta_mes) * 100, 2) if meta_mes else 0,
+            "falta": max(meta_mes - acab26m, 0)
+        }
+    }
+
+    salvar_json("kpi_meta_mes.json", meta_json)
+
+    print("\nPAINEL PRODUÇÃO ATUALIZADO - META SEPARADA\n")
 
 
 if __name__ == "__main__":

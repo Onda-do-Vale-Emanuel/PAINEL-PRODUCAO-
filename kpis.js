@@ -1,84 +1,46 @@
-// ======================================================
-// PAINEL INFORMATIVO PRODUÇÃO - KPIs DEFINITIVO
-// ======================================================
-
-function formatarNumeroKg(valor) {
-  const numero = Math.round(Number(valor || 0));
-
-  return numero.toLocaleString("pt-BR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }) + " Kg";
+function formatarNumero(valor) {
+  return Math.round(Number(valor || 0)).toLocaleString("pt-BR") + " Kg";
 }
 
-function formatarVariacao(valor) {
-  const sinal = valor >= 0 ? "▲" : "▼";
-  const classe = valor >= 0 ? "positivo" : "negativo";
-
-  return `<span class="${classe}">${sinal} ${Math.abs(valor).toFixed(2)}%</span>`;
+function formatarPercentual(valor) {
+  return valor.toFixed(2).replace(".", ",") + " %";
 }
 
-// =========================
-// PESO DO DIA
-// =========================
+/* ================= META ================= */
 
-fetch("dados/kpi_peso_dia.json")
+fetch("dados/kpi_meta_mes.json")
   .then(res => res.json())
   .then(data => {
 
-    document.getElementById("diaDataAtual").innerText =
-      `Data: ${data.data_atual}`;
-
     // IMPRESSORAS
-    document.getElementById("diaImpAtual").innerText =
-      formatarNumeroKg(data.impressoras.atual);
+    document.getElementById("metaImpValor").innerText = formatarNumero(data.impressoras.meta);
+    document.getElementById("metaImpPercent").innerText = formatarPercentual(data.impressoras.percentual);
+    document.getElementById("metaImpFalta").innerText =
+        data.impressoras.falta > 0
+            ? "Falta: " + formatarNumero(data.impressoras.falta)
+            : "";
 
-    document.getElementById("diaImpAnterior").innerText =
-      formatarNumeroKg(data.impressoras.ano_anterior);
+    document.getElementById("barraImp").style.width =
+        Math.min(data.impressoras.percentual, 100) + "%";
 
-    document.getElementById("diaImpVar").innerHTML =
-      formatarVariacao(data.impressoras.variacao);
+    if (data.impressoras.percentual >= 100) {
+        document.getElementById("metaImpStatus").innerHTML =
+            "🎉 Parabéns! Meta Atingida! 🎆";
+    }
 
     // ACABAMENTO
-    document.getElementById("diaAcabAtual").innerText =
-      formatarNumeroKg(data.acabamento.atual);
+    document.getElementById("metaAcabValor").innerText = formatarNumero(data.acabamento.meta);
+    document.getElementById("metaAcabPercent").innerText = formatarPercentual(data.acabamento.percentual);
+    document.getElementById("metaAcabFalta").innerText =
+        data.acabamento.falta > 0
+            ? "Falta: " + formatarNumero(data.acabamento.falta)
+            : "";
 
-    document.getElementById("diaAcabAnterior").innerText =
-      formatarNumeroKg(data.acabamento.ano_anterior);
+    document.getElementById("barraAcab").style.width =
+        Math.min(data.acabamento.percentual, 100) + "%";
 
-    document.getElementById("diaAcabVar").innerHTML =
-      formatarVariacao(data.acabamento.variacao);
-  });
-
-
-// =========================
-// ACUMULADO DO MÊS
-// =========================
-
-fetch("dados/kpi_acumulado_mes.json")
-  .then(res => res.json())
-  .then(data => {
-
-    document.getElementById("mesPeriodoAtual").innerText =
-      `Período: ${data.periodo_atual}`;
-
-    // IMPRESSORAS
-    document.getElementById("mesImpAtual").innerText =
-      formatarNumeroKg(data.impressoras.atual);
-
-    document.getElementById("mesImpAnterior").innerText =
-      formatarNumeroKg(data.impressoras.ano_anterior);
-
-    document.getElementById("mesImpVar").innerHTML =
-      formatarVariacao(data.impressoras.variacao);
-
-    // ACABAMENTO
-    document.getElementById("mesAcabAtual").innerText =
-      formatarNumeroKg(data.acabamento.atual);
-
-    document.getElementById("mesAcabAnterior").innerText =
-      formatarNumeroKg(data.acabamento.ano_anterior);
-
-    document.getElementById("mesAcabVar").innerHTML =
-      formatarVariacao(data.acabamento.variacao);
-  });
+    if (data.acabamento.percentual >= 100) {
+        document.getElementById("metaAcabStatus").innerHTML =
+            "🎉 Parabéns! Meta Atingida! 🎆";
+    }
+});
