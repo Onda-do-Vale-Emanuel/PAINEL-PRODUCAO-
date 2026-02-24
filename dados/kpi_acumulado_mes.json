@@ -1,13 +1,13 @@
 {
-  "periodo_atual": "01/02/2026 até 23/02/2026",
+  "periodo_atual": "01/02/2026 até 24/02/2026",
   "impressoras": {
-    "atual": 63698.0,
-    "ano_anterior": 66407.0,
-    "variacao": -4.08
+    "atual": 71084.0,
+    "ano_anterior": 70195.0,
+    "variacao": 1.27
   },
   "acabamento": {
-    "atual": 56436.0,
-    "ano_anterior": 69103.0,
-    "variacao": -18.33
+    "atual": 61928.0,
+    "ano_anterior": 73060.0,
+    "variacao": -15.24
   }
 }
