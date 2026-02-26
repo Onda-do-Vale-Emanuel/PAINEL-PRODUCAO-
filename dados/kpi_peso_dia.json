@@ -1,14 +1,14 @@
 {
-  "data_atual": "25/02/2026",
-  "data_anterior": "25/02/2025",
+  "data_atual": "26/02/2026",
+  "data_anterior": "26/02/2025",
   "impressoras": {
-    "atual": 7088.0,
-    "ano_anterior": 5771.0,
-    "variacao": 22.82
+    "atual": 7731.0,
+    "ano_anterior": 4135.0,
+    "variacao": 86.96
   },
   "acabamento": {
-    "atual": 4162.0,
-    "ano_anterior": 3387.0,
-    "variacao": 22.88
+    "atual": 5387.0,
+    "ano_anterior": 5993.0,
+    "variacao": -10.11
   }
 }
