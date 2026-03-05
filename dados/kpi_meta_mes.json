@@ -1,14 +1,14 @@
 {
   "impressoras": {
-    "meta": 100000.0,
-    "producao": 90576.0,
-    "percentual": 90.58,
-    "falta": 9424.0
+    "meta": 120000.0,
+    "producao": 16048.0,
+    "percentual": 13.37,
+    "falta": 103952.0
   },
   "acabamento": {
-    "meta": 100000.0,
-    "producao": 74325.0,
-    "percentual": 74.33,
-    "falta": 25675.0
+    "meta": 120000.0,
+    "producao": 19261.0,
+    "percentual": 16.05,
+    "falta": 100739.0
   }
 }
